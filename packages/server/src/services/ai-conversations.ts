@@ -1,5 +1,5 @@
 import { and, eq, desc } from 'drizzle-orm';
-import type { AiConversationMessage, AiSavedConversation, AnalysisContextSnapshot } from '@bloommate/shared';
+import type { AiConversationMessage, AiSavedConversation, AnalysisContextSnapshot } from '@littlefootprints/shared';
 import { db } from '../db/index.js';
 import { aiSavedConversationTable } from '../db/schema/ai-analysis-report.js';
 import { buildQuestionPrompt } from './ai-prompts.js';

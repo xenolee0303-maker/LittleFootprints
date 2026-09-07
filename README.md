@@ -1,4 +1,4 @@
-# BloomMate 🌱
+# LittleFootprints 🌱
 
 自托管的**家庭成长档案**：记录孩子的兴趣爱好、成长经历（旅游、比赛、演出、聚会）、身高体重和活动照片，并可用 AI 生成每周的成长亮点报告。专为家庭内网设计，一个 6 位家庭 PIN 全家共用，数据完全留在自己家里。
 
@@ -28,8 +28,8 @@
 需要一台内网常开的机器（NAS、小主机、树莓派均可）：
 
 ```bash
-git clone https://github.com/xxx/bloommate.git
-cd bloommate
+git clone https://github.com/xenolee0303-maker/LittleFootprints.git
+cd littlefootprints
 
 cp .env.example .env
 # 编辑 .env：
@@ -71,7 +71,7 @@ npm run typecheck  # 类型检查
 
 ## 与其他家庭系统联动
 
-BloomMate 保持独立、无外部依赖。它的所有能力都通过 `/api/**` + 家庭 PIN 会话暴露，孩子用稳定的 UUID 标识——如果你同时运行学习排期类的系统，可以在任一侧通过 API 桥接两个系统的数据（例如把 BloomMate 的兴趣数据拉进另一侧的分析），两边仍然独立部署、独立备份。
+LittleFootprints 保持独立、无外部依赖。它的所有能力都通过 `/api/**` + 家庭 PIN 会话暴露，孩子用稳定的 UUID 标识——如果你同时运行学习排期类的系统，可以在任一侧通过 API 桥接两个系统的数据（例如把 LittleFootprints 的兴趣数据拉进另一侧的分析），两边仍然独立部署、独立备份。
 
 ## 贡献
 

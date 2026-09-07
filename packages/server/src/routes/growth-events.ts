@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import * as eventsService from '../services/growth-events.js';
-import type { CreateGrowthEventInput, UpdateGrowthEventInput } from '@bloommate/shared';
+import type { CreateGrowthEventInput, UpdateGrowthEventInput } from '@littlefootprints/shared';
 import {
   isPlainObject,
   hasOwn,

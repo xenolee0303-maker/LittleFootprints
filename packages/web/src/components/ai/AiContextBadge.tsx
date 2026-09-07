@@ -1,4 +1,4 @@
-import type { AiContextModule, AiContextPage, AnalysisContextSnapshot } from '@bloommate/shared';
+import type { AiContextModule, AiContextPage, AnalysisContextSnapshot } from '@littlefootprints/shared';
 
 const pageLabels: Record<AiContextPage, string> = { growth: '成长' };
 const moduleLabels: Record<AiContextModule, string> = { page: '整页', interests: '兴趣', 'growth-timeline': '成长时间线', profile: '成长档案' };

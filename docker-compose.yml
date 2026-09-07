@@ -1,7 +1,7 @@
 services:
-  bloommate:
+  littlefootprints:
     build: .
-    container_name: bloommate
+    container_name: littlefootprints
     ports:
       - "3002:3002"
     volumes:
@@ -12,7 +12,7 @@ services:
     environment:
       NODE_ENV: production
       TZ: Asia/Shanghai
-      DATABASE_PATH: /app/data/bloommate.db
+      DATABASE_PATH: /app/data/littlefootprints.db
       MEDIA_LIBRARY_PATH: /app/media
       FAMILY_PIN: ${FAMILY_PIN:?请先在部署目录的 .env 中设置 6 位 FAMILY_PIN}
       AI_CONFIG_ENCRYPTION_KEY: ${AI_CONFIG_ENCRYPTION_KEY:?请先在部署目录的 .env 中设置 AI_CONFIG_ENCRYPTION_KEY}

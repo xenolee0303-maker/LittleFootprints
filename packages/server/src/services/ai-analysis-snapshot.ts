@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm';
-import type { AnalysisEvidence, AnalysisSnapshot, AiConfidence } from '@bloommate/shared';
+import type { AnalysisEvidence, AnalysisSnapshot, AiConfidence } from '@littlefootprints/shared';
 import { db } from '../db/index.js';
 import { childTable } from '../db/schema/child.js';
 import { childProfileTable } from '../db/schema/child-profile.js';
@@ -7,7 +7,7 @@ import { interestTable } from '../db/schema/interest.js';
 import { interestNoteTable } from '../db/schema/interest-note.js';
 import { growthEventTable } from '../db/schema/growth-event.js';
 import { getComparisonWeeks, addDays } from './week-utils.js';
-import { getWeekStartDate } from '@bloommate/shared';
+import { getWeekStartDate } from '@littlefootprints/shared';
 
 function evidence(sourceType: AnalysisEvidence['sourceType'], sourceId: string, label: string, value: string | number): AnalysisEvidence {
   return { id: `evidence:${sourceType}:${sourceId}`, sourceType, sourceId, label, value };

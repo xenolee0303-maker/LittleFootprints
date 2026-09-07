@@ -1,4 +1,4 @@
-import type { AiConfidence, AiReportPayload, AnalysisContextSnapshot, AnalysisEvidence, AnalysisSnapshot } from '@bloommate/shared';
+import type { AiConfidence, AiReportPayload, AnalysisContextSnapshot, AnalysisEvidence, AnalysisSnapshot } from '@littlefootprints/shared';
 
 export const AI_REPORT_SCHEMA_VERSION = 'ai-report.v1';
 export type AiOutputFailureCode = 'invalid_json' | 'invalid_schema' | 'invalid_evidence';

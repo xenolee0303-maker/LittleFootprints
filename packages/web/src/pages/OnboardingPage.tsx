@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { api } from '../api/client';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import type { Child } from '@bloommate/shared';
+import type { Child } from '@littlefootprints/shared';
 
 export function OnboardingPage({ onComplete }: { onComplete: () => void }) {
   const [name, setName] = useState('');
@@ -25,7 +25,7 @@ export function OnboardingPage({ onComplete }: { onComplete: () => void }) {
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-50 px-6">
       <section className="w-full max-w-md rounded-2xl bg-white p-8 shadow-sm">
-        <h1 className="text-center text-2xl font-bold text-slate-900">欢迎使用 BloomMate 🌱</h1>
+        <h1 className="text-center text-2xl font-bold text-slate-900">欢迎使用 LittleFootprints 🌱</h1>
         <p className="mt-3 text-center text-sm text-slate-500">
           家庭成长档案：记录孩子的兴趣、经历、身高体重和照片，生成每周的成长亮点。
         </p>

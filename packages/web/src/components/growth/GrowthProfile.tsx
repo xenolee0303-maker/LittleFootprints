@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import type { ChildProfile, GrowthMeasurement } from '@bloommate/shared';
+import type { ChildProfile, GrowthMeasurement } from '@littlefootprints/shared';
 import {
   useProfile,
   useSaveProfile,

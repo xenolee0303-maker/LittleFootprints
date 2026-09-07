@@ -1,7 +1,7 @@
 import { db } from '../db/index.js';
 import { growthEventTable } from '../db/schema/growth-event.js';
 import { eq } from 'drizzle-orm';
-import type { GrowthEvent, CreateGrowthEventInput, UpdateGrowthEventInput } from '@bloommate/shared';
+import type { GrowthEvent, CreateGrowthEventInput, UpdateGrowthEventInput } from '@littlefootprints/shared';
 import { childExists } from './child-profile.js';
 import { markAiReportsStale } from './ai-reports.js';
 import { listAssetsByEvents } from './media-assets.js';

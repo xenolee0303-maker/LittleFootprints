@@ -1,4 +1,4 @@
-import type { AnalysisSnapshot } from '@bloommate/shared';
+import type { AnalysisSnapshot } from '@littlefootprints/shared';
 
 export interface AiReportInput {
   childId: string;

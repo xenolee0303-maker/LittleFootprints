@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import * as profileService from '../services/child-profile.js';
 import { listChildSummaries } from '../services/ai-reports.js';
-import type { UpsertChildProfileInput } from '@bloommate/shared';
+import type { UpsertChildProfileInput } from '@littlefootprints/shared';
 import {
   isPlainObject,
   hasOwn,

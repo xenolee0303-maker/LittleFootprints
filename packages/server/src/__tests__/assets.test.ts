@@ -4,10 +4,10 @@ import { existsSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { tmpdir } from 'node:os';
 
-const uploadsRoot = path.join(tmpdir(), `bloommate-uploads-test-${process.pid}`);
+const uploadsRoot = path.join(tmpdir(), `littlefootprints-uploads-test-${process.pid}`);
 
 function multipartBody(fieldName: string, fileName: string, contentType: string, content: Buffer): { payload: Buffer; headers: Record<string, string> } {
-  const boundary = `----bloommate${process.pid}`;
+  const boundary = `----littlefootprints${process.pid}`;
   const parts = [
     Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="${fieldName}"; filename="${fileName}"\r\nContent-Type: ${contentType}\r\n\r\n`),
     content,

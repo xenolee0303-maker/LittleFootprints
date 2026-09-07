@@ -1,6 +1,6 @@
 import { and, eq, gte, isNull, lte } from 'drizzle-orm';
-import type { AiAnalysisReport, AiAnalysisReportRevision, AiReportFailureCode, AiReportFailureStage, AiReportPayload, AnalysisSnapshot, ChildWeeklySummary } from '@bloommate/shared';
-import { getWeekStartDate } from '@bloommate/shared';
+import type { AiAnalysisReport, AiAnalysisReportRevision, AiReportFailureCode, AiReportFailureStage, AiReportPayload, AnalysisSnapshot, ChildWeeklySummary } from '@littlefootprints/shared';
+import { getWeekStartDate } from '@littlefootprints/shared';
 import { getComparisonWeeks } from './week-utils.js';
 import { db } from '../db/index.js';
 import { aiAnalysisReportTable, aiAnalysisReportRevisionTable } from '../db/schema/ai-analysis-report.js';

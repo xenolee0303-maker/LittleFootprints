@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react';
-import type { Child, GrowthEvent, GrowthEventType } from '@bloommate/shared';
-import { GROWTH_EVENT_TYPE_LABELS } from '@bloommate/shared';
+import type { Child, GrowthEvent, GrowthEventType } from '@littlefootprints/shared';
+import { GROWTH_EVENT_TYPE_LABELS } from '@littlefootprints/shared';
 import { useGrowthEvents, useCreateGrowthEvent, useUpdateGrowthEvent, useDeleteGrowthEvent, useUploadEventAsset, useDeleteAsset } from '../../hooks/useGrowth';
 import { AssetViewer, AssetThumb } from './AssetViewer';
-import type { MediaAssetInfo } from '@bloommate/shared';
+import type { MediaAssetInfo } from '@littlefootprints/shared';
 import { usePerspective } from '../../lib/perspective';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';

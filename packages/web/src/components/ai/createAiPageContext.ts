@@ -1,4 +1,4 @@
-import type { AiContextModule, AiContextPage, AnalysisContextSnapshot } from '@bloommate/shared';
+import type { AiContextModule, AiContextPage, AnalysisContextSnapshot } from '@littlefootprints/shared';
 export function createAiPageContext(input: { page: AiContextPage; module: AiContextModule; childId: string; childLabel: string; dateFrom?: string; dateTo?: string; filters?: Record<string, string | number | boolean | null>; metrics?: Record<string, number | string | null> }): AnalysisContextSnapshot {
   const dateFrom = input.dateFrom;
   const dateTo = input.dateTo;

@@ -1,8 +1,8 @@
-import type { AnalysisContextSnapshot, AnalysisSnapshot } from '@bloommate/shared';
+import type { AnalysisContextSnapshot, AnalysisSnapshot } from '@littlefootprints/shared';
 import type { AiChatMessage } from './ai-provider.js';
 import type { AiReportInput } from './ai-report-input.js';
 
-export const AI_PROMPT_VERSION = 'bloommate-ai-prompts.v1';
+export const AI_PROMPT_VERSION = 'littlefootprints-ai-prompts.v1';
 
 const reportRules = `你是家庭成长记录的分析助手，服务对象是记录孩子兴趣与成长经历的家庭。只根据提供的结构化快照和证据解释，不自行计算或编造数字。不得读取网页 DOM、家庭 PIN、模型配置或其他孩子的数据；不得进行医学、心理或人格诊断，不给孩子贴标签。输出必须是纯 JSON，不能使用 Markdown 代码围栏。所有观察和建议必须引用 evidenceIds；其中出现的每一个数字，都必须在该条 evidenceIds 中包含 value 完全一致的证据，不能通过其他数字推导。`;
 

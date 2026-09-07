@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { AnalysisContextSnapshot, AiSavedConversation } from '@bloommate/shared';
+import type { AnalysisContextSnapshot, AiSavedConversation } from '@littlefootprints/shared';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { AiContextBadge } from './AiContextBadge';

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { AiProviderConfig, AiProviderMode } from '@bloommate/shared';
+import type { AiProviderConfig, AiProviderMode } from '@littlefootprints/shared';
 import { useAiProviders, useCreateAiProvider, useDeleteAiProvider, useTestAiProvider, useUpdateAiProvider } from '../../hooks/useAiAnalysis';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';

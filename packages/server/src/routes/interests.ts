@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import * as interestsService from '../services/interests.js';
 import { childExists } from '../services/child-profile.js';
-import type { CreateInterestInput, UpdateInterestInput, CreateInterestNoteInput, UpdateInterestNoteInput } from '@bloommate/shared';
+import type { CreateInterestInput, UpdateInterestInput, CreateInterestNoteInput, UpdateInterestNoteInput } from '@littlefootprints/shared';
 import {
   isPlainObject,
   hasOwn,

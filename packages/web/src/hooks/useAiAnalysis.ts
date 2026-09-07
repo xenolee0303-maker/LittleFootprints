@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { AiAnalysisReport, AiReportPayload, AiAnalysisReportRevision, AiSavedConversation, SaveAiConversationRequest, AiProviderConfig, CreateAiProviderConfigRequest, UpdateAiProviderConfigRequest } from '@bloommate/shared';
+import type { AiAnalysisReport, AiReportPayload, AiAnalysisReportRevision, AiSavedConversation, SaveAiConversationRequest, AiProviderConfig, CreateAiProviderConfigRequest, UpdateAiProviderConfigRequest } from '@littlefootprints/shared';
 import { api } from '../api/client';
 
 export interface AiReportDetail { report: AiAnalysisReport; payload?: AiReportPayload; revision?: AiAnalysisReportRevision }

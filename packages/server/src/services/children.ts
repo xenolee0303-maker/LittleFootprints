@@ -1,7 +1,7 @@
 import { db } from '../db/index.js';
 import { childTable } from '../db/schema/child.js';
 import { eq } from 'drizzle-orm';
-import type { Child, CreateChildInput, UpdateChildInput } from '@bloommate/shared';
+import type { Child, CreateChildInput, UpdateChildInput } from '@littlefootprints/shared';
 
 function generateId(): string {
   return crypto.randomUUID();

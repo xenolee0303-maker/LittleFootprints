@@ -1,5 +1,5 @@
 {
-  "name": "@bloommate/server",
+  "name": "@littlefootprints/server",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -7,12 +7,12 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc && cp -r src/db/migrations dist/db/",
     "start": "tsx dist/index.js",
-    "pretest": "npm run build -w @bloommate/shared",
+    "pretest": "npm run build -w @littlefootprints/shared",
     "test": "NODE_ENV=test node --import tsx --test \"src/**/*.test.ts\"",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@bloommate/shared": "*",
+    "@littlefootprints/shared": "*",
     "@fastify/cors": "^10.0.0",
     "@fastify/multipart": "^10.1.1",
     "@fastify/static": "^9.1.3",

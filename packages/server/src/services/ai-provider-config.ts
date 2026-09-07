@@ -1,7 +1,7 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto';
 import { aiProviderConfigTable } from '../db/schema/ai-provider-config.js';
 import { eq } from 'drizzle-orm';
-import type { AiProviderConfig, CreateAiProviderConfigRequest, UpdateAiProviderConfigRequest } from '@bloommate/shared';
+import type { AiProviderConfig, CreateAiProviderConfigRequest, UpdateAiProviderConfigRequest } from '@littlefootprints/shared';
 import { OpenAICompatibleProvider } from './ai-provider.js';
 
 const ALGORITHM = 'aes-256-gcm';

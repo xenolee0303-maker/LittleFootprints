@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import * as measurementService from '../services/growth-measurements.js';
 import { childExists } from '../services/child-profile.js';
-import type { CreateGrowthMeasurementInput, UpdateGrowthMeasurementInput } from '@bloommate/shared';
+import type { CreateGrowthMeasurementInput, UpdateGrowthMeasurementInput } from '@littlefootprints/shared';
 import {
   isPlainObject,
   hasOwn,

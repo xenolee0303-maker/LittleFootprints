@@ -7,7 +7,7 @@ import { GrowthProfile } from '../components/growth/GrowthProfile';
 import { ChildWeeklySummaryCard } from '../components/growth/ChildWeeklySummary';
 import { AiQuestionPanel } from '../components/ai/AiQuestionPanel';
 import { createAiPageContext } from '../components/ai/createAiPageContext';
-import type { AiContextModule } from '@bloommate/shared';
+import type { AiContextModule } from '@littlefootprints/shared';
 
 type Section = 'timeline' | 'interests' | 'profile';
 

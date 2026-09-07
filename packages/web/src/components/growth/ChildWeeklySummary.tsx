@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { ChildWeeklySummary } from '@bloommate/shared';
+import type { ChildWeeklySummary } from '@littlefootprints/shared';
 import { useChildSummaries } from '../../hooks/useGrowth';
 import { usePerspective } from '../../lib/perspective';
 

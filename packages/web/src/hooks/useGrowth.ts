@@ -16,7 +16,7 @@ import type {
   UpdateInterestNoteInput,
   CreateGrowthEventInput,
   UpdateGrowthEventInput,
-} from '@bloommate/shared';
+} from '@littlefootprints/shared';
 
 // ── Child profile ────────────────────────────────────────
 

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../api/client';
-import type { MediaStatus, MediaDirectoryInfo, MediaItem } from '@bloommate/shared';
+import type { MediaStatus, MediaDirectoryInfo, MediaItem } from '@littlefootprints/shared';
 
 export function useMediaStatus() {
   return useQuery({

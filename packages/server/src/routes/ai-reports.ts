@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import * as reports from '../services/ai-reports.js';
-import type { AiReportFailureCode } from '@bloommate/shared';
+import type { AiReportFailureCode } from '@littlefootprints/shared';
 
 function errorStatus(error: unknown, failureCode?: AiReportFailureCode): number {
   if (failureCode === 'input_too_large') return 413;

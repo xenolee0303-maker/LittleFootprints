@@ -3,7 +3,7 @@ import { existsSync, createReadStream } from 'node:fs';
 import path from 'node:path';
 import { eq, inArray } from 'drizzle-orm';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import type { MediaAssetInfo, MediaKind } from '@bloommate/shared';
+import type { MediaAssetInfo, MediaKind } from '@littlefootprints/shared';
 import { db } from '../db/index.js';
 import { mediaAssetTable } from '../db/schema/media-asset.js';
 import { generateThumbnail } from './media-library.js';

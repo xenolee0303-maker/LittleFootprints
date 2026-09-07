@@ -10,7 +10,7 @@ import type {
   UpdateInterestInput,
   CreateInterestNoteInput,
   UpdateInterestNoteInput,
-} from '@bloommate/shared';
+} from '@littlefootprints/shared';
 import { childExists } from './child-profile.js';
 import { markAiReportsStale } from './ai-reports.js';
 import { listAssetsByNotes } from './media-assets.js';

@@ -25,7 +25,7 @@ export function MobileLayout() {
   return (
     <div className="flex flex-col min-h-screen">
       <header className="flex items-center justify-between px-4 py-2 bg-white border-b">
-        <span className="font-bold text-primary">BloomMate</span>
+        <span className="font-bold text-primary">LittleFootprints</span>
         <PerspectiveSwitcher />
       </header>
       <main className="flex-1 pb-16">

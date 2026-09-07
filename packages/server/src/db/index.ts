@@ -14,7 +14,7 @@ import * as mediaAssetSchema from './schema/media-asset.js';
 import * as aiProviderConfigSchema from './schema/ai-provider-config.js';
 import * as aiAnalysisReportSchema from './schema/ai-analysis-report.js';
 
-const defaultDbPath = resolve(dirname(fileURLToPath(import.meta.url)), '../../../../data/bloommate.db');
+const defaultDbPath = resolve(dirname(fileURLToPath(import.meta.url)), '../../../../data/littlefootprints.db');
 const dbPath = process.env.NODE_ENV === 'test' ? ':memory:' : process.env.DATABASE_PATH ?? defaultDbPath;
 if (dbPath !== ':memory:') {
   mkdirSync(dirname(dbPath), { recursive: true });

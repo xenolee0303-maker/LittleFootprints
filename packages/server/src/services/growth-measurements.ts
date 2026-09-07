@@ -1,7 +1,7 @@
 import { db } from '../db/index.js';
 import { growthMeasurementTable } from '../db/schema/growth-measurement.js';
 import { eq } from 'drizzle-orm';
-import type { GrowthMeasurement, CreateGrowthMeasurementInput, UpdateGrowthMeasurementInput } from '@bloommate/shared';
+import type { GrowthMeasurement, CreateGrowthMeasurementInput, UpdateGrowthMeasurementInput } from '@littlefootprints/shared';
 import { childExists } from './child-profile.js';
 
 function generateId(): string {

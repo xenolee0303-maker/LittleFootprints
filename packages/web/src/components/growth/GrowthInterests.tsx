@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import type { Interest, InterestCategory, InterestStatus, InterestNoteType, InterestNote } from '@bloommate/shared';
+import type { Interest, InterestCategory, InterestStatus, InterestNoteType, InterestNote } from '@littlefootprints/shared';
 import {
   INTEREST_CATEGORY_LABELS,
   INTEREST_STATUS_LABELS,
   INTEREST_NOTE_TYPE_LABELS,
   AUTHOR_ROLE_LABELS,
-} from '@bloommate/shared';
+} from '@littlefootprints/shared';
 import {
   useInterests,
   useCreateInterest,
@@ -22,7 +22,7 @@ import { Modal } from '../ui/Modal';
 import { EmptyState } from '../shared/EmptyState';
 import { AssetViewer, AssetThumb } from './AssetViewer';
 import { useUploadAsset, useDeleteAsset } from '../../hooks/useGrowth';
-import type { MediaAssetInfo } from '@bloommate/shared';
+import type { MediaAssetInfo } from '@littlefootprints/shared';
 
 const CATEGORIES = Object.keys(INTEREST_CATEGORY_LABELS) as InterestCategory[];
 const STATUSES = Object.keys(INTEREST_STATUS_LABELS) as InterestStatus[];

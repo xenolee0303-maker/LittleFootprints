@@ -4,7 +4,7 @@ import { mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
-const mediaRoot = path.join(tmpdir(), `bloommate-media-test-${process.pid}`);
+const mediaRoot = path.join(tmpdir(), `littlefootprints-media-test-${process.pid}`);
 const thumbnailDir = path.join(mediaRoot, '-thumbs');
 
 async function createChild(app: any): Promise<string> {
@@ -175,7 +175,7 @@ test('media library API', async (t) => {
   });
 
   await t.test('unconfigured library reports not configured without errors', async () => {
-    process.env.MEDIA_LIBRARY_PATH = path.join(tmpdir(), `bloommate-media-missing-${process.pid}`);
+    process.env.MEDIA_LIBRARY_PATH = path.join(tmpdir(), `littlefootprints-media-missing-${process.pid}`);
     invalidateMediaDirectoryCache();
     const status = await app.inject({ method: 'GET', url: '/api/media/status' });
     assert.strictEqual(status.statusCode, 200);

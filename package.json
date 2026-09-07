@@ -1,17 +1,17 @@
 {
-  "name": "bloommate",
+  "name": "littlefootprints",
   "private": true,
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
-    "predev": "npm run build -w @bloommate/shared && lsof -ti:3002 | xargs kill -9 2>/dev/null; lsof -ti:5174 | xargs kill -9 2>/dev/null; echo 'Ports cleaned'",
-    "dev": "npm run predev && echo '🚀 BloomMate 后端 http://localhost:3002 · 前端 http://localhost:5174' && npm run dev:server & npm run dev:web & wait",
+    "predev": "npm run build -w @littlefootprints/shared && lsof -ti:3002 | xargs kill -9 2>/dev/null; lsof -ti:5174 | xargs kill -9 2>/dev/null; echo 'Ports cleaned'",
+    "dev": "npm run predev && echo '🚀 LittleFootprints 后端 http://localhost:3002 · 前端 http://localhost:5174' && npm run dev:server & npm run dev:web & wait",
     "dev:server": "npm run dev --workspace=packages/server",
     "dev:web": "npm run dev --workspace=packages/web",
     "build": "npm run build --workspaces",
     "typecheck": "npm run typecheck --workspaces",
-    "test": "npm run build -w @bloommate/shared && npm test --workspace=packages/server && npm test --workspace=packages/web"
+    "test": "npm run build -w @littlefootprints/shared && npm test --workspace=packages/server && npm test --workspace=packages/web"
   },
   "devDependencies": {
     "jsdom": "^29.0.0"

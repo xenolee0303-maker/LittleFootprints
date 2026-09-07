@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 
 export type Perspective = { mode: 'parent' } | { mode: 'child'; childId: string };
 
-const STORAGE_KEY = 'bloommate-perspective';
+const STORAGE_KEY = 'littlefootprints-perspective';
 
 interface PerspectiveContextValue {
   perspective: Perspective;

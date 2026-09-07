@@ -3,7 +3,7 @@ import type { FastifyInstance } from 'fastify';
 import type { AuthConfig } from './config.js';
 import { SessionStore } from './session-store.js';
 
-const SESSION_COOKIE = 'bloommate_session';
+const SESSION_COOKIE = 'littlefootprints_session';
 const TOKEN_PATTERN = /^[a-f0-9]{64}$/i;
 const PIN_PATTERN = /^\d{6}$/;
 const AUTHENTICATION_REQUIRED = { message: 'Authentication required' };

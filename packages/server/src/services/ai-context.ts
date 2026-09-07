@@ -1,6 +1,6 @@
-import type { AiContextModule, AiContextPage, AnalysisContextSnapshot } from '@bloommate/shared';
+import type { AiContextModule, AiContextPage, AnalysisContextSnapshot } from '@littlefootprints/shared';
 import { buildAnalysisSnapshot } from './ai-analysis-snapshot.js';
-import { todayLocalDate, getWeekStartDate } from '@bloommate/shared';
+import { todayLocalDate, getWeekStartDate } from '@littlefootprints/shared';
 
 export const AI_CONTEXT_REGISTRY: Readonly<Record<AiContextPage, readonly AiContextModule[]>> = Object.freeze({
   growth: ['page', 'interests', 'growth-timeline', 'profile'],

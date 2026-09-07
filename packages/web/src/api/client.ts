@@ -5,7 +5,7 @@ function normalizePath(path: string) {
   return path.split(/[?#]/, 1)[0].replace(/\/+$/, '');
 }
 
-export const AUTH_REQUIRED_EVENT = 'bloommate-auth-required';
+export const AUTH_REQUIRED_EVENT = 'littlefootprints-auth-required';
 
 let authenticationGeneration = 0;
 let authenticationInvalidated = false;

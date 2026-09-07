@@ -42,7 +42,7 @@ export function LoginPage({ onAuthenticated }: LoginPageProps) {
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-50 px-6">
       <section className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-sm">
-        <h1 className="text-center text-2xl font-bold text-slate-900">BloomMate</h1>
+        <h1 className="text-center text-2xl font-bold text-slate-900">LittleFootprints</h1>
         <p className="mt-1 text-center text-xs text-slate-400">家庭成长档案</p>
         <p className="mt-2 text-center text-sm text-slate-500">请输入家庭 PIN 进入</p>
 

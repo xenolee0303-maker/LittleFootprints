@@ -21,7 +21,7 @@ try {
   };
   process.once('SIGTERM', shutdown);
   process.once('SIGINT', shutdown);
-  console.log('BloomMate server running on http://localhost:3002');
+  console.log('LittleFootprints server running on http://localhost:3002');
 } catch (err) {
   scheduler?.stop();
   if (app !== undefined) {

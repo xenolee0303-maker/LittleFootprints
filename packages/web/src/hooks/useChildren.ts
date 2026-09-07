@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../api/client';
-import type { Child, CreateChildInput, UpdateChildInput } from '@bloommate/shared';
+import type { Child, CreateChildInput, UpdateChildInput } from '@littlefootprints/shared';
 
 export function useChildren() {
   return useQuery({

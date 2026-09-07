@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { MediaItem } from '@bloommate/shared';
+import type { MediaItem } from '@littlefootprints/shared';
 import { useMediaItems, mediaThumbUrl, mediaOriginalUrl } from '../../hooks/useMedia';
 import { EmptyState } from '../shared/EmptyState';
 

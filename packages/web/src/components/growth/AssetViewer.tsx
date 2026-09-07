@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import type { MediaAssetInfo } from '@bloommate/shared';
+import type { MediaAssetInfo } from '@littlefootprints/shared';
 
 export function assetUrl(id: string): string {
   return `/api/assets/${encodeURIComponent(id)}`;

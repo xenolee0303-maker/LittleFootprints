@@ -6,7 +6,7 @@ import { DesktopLayout } from './layouts/DesktopLayout';
 import { OnboardingPage } from './pages/OnboardingPage';
 import { LoginPage } from './pages/LoginPage';
 import { PerspectiveProvider } from './lib/perspective';
-import type { Child } from '@bloommate/shared';
+import type { Child } from '@littlefootprints/shared';
 
 type AuthState = 'checking' | 'authenticated' | 'unauthenticated' | 'unavailable';
 

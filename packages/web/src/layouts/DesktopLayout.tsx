@@ -25,7 +25,7 @@ export function DesktopLayout() {
   return (
     <div className="flex min-h-screen">
       <aside className="w-56 bg-white border-r p-4 flex flex-col gap-2">
-        <h1 className="text-lg font-bold mb-4 text-primary">BloomMate</h1>
+        <h1 className="text-lg font-bold mb-4 text-primary">LittleFootprints</h1>
         {visibleItems.map(item => (
           <button
             key={item.key}

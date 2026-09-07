@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Child } from '@bloommate/shared';
+import type { Child } from '@littlefootprints/shared';
 import { GrowthPage } from './GrowthPage';
 
 const { mockedUseChildren, mockedUsePerspective, mockedUseGrowthEvents, mockedUseChildSummaries, mockedUseInterests } = vi.hoisted(() => ({

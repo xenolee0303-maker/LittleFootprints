@@ -3,7 +3,7 @@ import { readdir, stat, mkdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import sharp from 'sharp';
-import type { MediaDirectoryInfo, MediaItem, MediaKind, MediaStatus } from '@bloommate/shared';
+import type { MediaDirectoryInfo, MediaItem, MediaKind, MediaStatus } from '@littlefootprints/shared';
 
 const IMAGE_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif', '.avif', '.bmp', '.tiff']);
 const VIDEO_EXTENSIONS = new Set(['.mp4', '.mov', '.webm', '.m4v', '.3gp']);

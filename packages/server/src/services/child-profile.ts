@@ -2,7 +2,7 @@ import { db } from '../db/index.js';
 import { childProfileTable } from '../db/schema/child-profile.js';
 import { childTable } from '../db/schema/child.js';
 import { eq } from 'drizzle-orm';
-import type { ChildProfile, UpsertChildProfileInput } from '@bloommate/shared';
+import type { ChildProfile, UpsertChildProfileInput } from '@littlefootprints/shared';
 
 export async function childExists(childId: string): Promise<boolean> {
   const row = await db.select({ id: childTable.id }).from(childTable).where(eq(childTable.id, childId)).get();
