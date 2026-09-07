@@ -161,6 +161,39 @@ describe('GrowthPage', () => {
     expect(screen.getByText('近4周 2 条')).toBeInTheDocument();
   });
 
+  it('renders note asset thumbnails and opens the viewer', async () => {
+    mockedUseInterests.mockReturnValue({
+      data: [
+        {
+          id: 'interest-1', childId: child.id, name: '画画', category: 'art', status: 'active',
+          startedAt: '2026-01-05', endedAt: null, description: null, createdAt: '', updatedAt: '',
+          notes: [
+            {
+              id: 'note-1', interestId: 'interest-1', date: new Date().toISOString().slice(0, 10), type: 'work',
+              content: '画了海底世界', authorRole: 'child',
+              assets: [
+                { id: 'asset-1', kind: 'image', fileName: '海底世界.jpg', sizeBytes: 1024, thumbnailUnavailable: false },
+                { id: 'asset-2', kind: 'video', fileName: '讲解.mp4', sizeBytes: 2048, thumbnailUnavailable: true },
+              ],
+              createdAt: '', updatedAt: '',
+            },
+          ],
+        },
+      ],
+      isLoading: false,
+    });
+    const { userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    renderPage();
+    await user.click(screen.getByRole('button', { name: '兴趣' }));
+    const imageThumb = await screen.findByAltText('海底世界.jpg');
+    expect(imageThumb).toBeInTheDocument();
+    expect(screen.getAllByText('🎬').length).toBeGreaterThanOrEqual(1);
+    await user.click(imageThumb);
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByText(/讲解\.mp4|1 \/ 2/)).toBeInTheDocument();
+  });
+
   it('switches to interests and profile sections', async () => {
     renderPage();
     const { userEvent } = await import('@testing-library/user-event');

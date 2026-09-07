@@ -20,6 +20,9 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Modal } from '../ui/Modal';
 import { EmptyState } from '../shared/EmptyState';
+import { AssetViewer, AssetThumb } from './AssetViewer';
+import { useUploadAsset, useDeleteAsset } from '../../hooks/useGrowth';
+import type { MediaAssetInfo } from '@bloommate/shared';
 
 const CATEGORIES = Object.keys(INTEREST_CATEGORY_LABELS) as InterestCategory[];
 const STATUSES = Object.keys(INTEREST_STATUS_LABELS) as InterestStatus[];
@@ -82,6 +85,11 @@ export function GrowthInterests({ childId }: { childId: string }) {
   const createNote = useCreateInterestNote();
   const updateNote = useUpdateInterestNote();
   const deleteNote = useDeleteInterestNote();
+  const uploadAsset = useUploadAsset();
+  const deleteAsset = useDeleteAsset();
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [viewingAssets, setViewingAssets] = useState<{ assets: MediaAssetInfo[]; index: number } | null>(null);
 
   const [interestFormOpen, setInterestFormOpen] = useState(false);
   const [editingInterest, setEditingInterest] = useState<Interest | null>(null);
@@ -141,21 +149,33 @@ export function GrowthInterests({ childId }: { childId: string }) {
     setNoteForm({ date: today(), type: 'practice', content: '' });
     setEditingNote(null);
     setNoteTarget(interest);
+    setPendingFiles([]);
+    setUploadError(null);
   };
 
   const openEditNote = (interest: Interest, note: InterestNote) => {
     setNoteForm({ date: note.date, type: note.type, content: note.content });
     setEditingNote(note);
     setNoteTarget(interest);
+    setPendingFiles([]);
+    setUploadError(null);
   };
 
-  const submitNote = () => {
+  const submitNote = async () => {
     if (!noteTarget) return;
     const payload = { date: noteForm.date, type: noteForm.type, content: noteForm.content, authorRole };
-    if (editingNote) {
-      updateNote.mutate({ id: editingNote.id, ...payload }, { onSuccess: () => setNoteTarget(null) });
-    } else {
-      createNote.mutate({ interestId: noteTarget.id, ...payload }, { onSuccess: () => setNoteTarget(null) });
+    setUploadError(null);
+    try {
+      const saved = editingNote
+        ? await updateNote.mutateAsync({ id: editingNote.id, ...payload })
+        : await createNote.mutateAsync({ interestId: noteTarget.id, ...payload });
+      for (const file of pendingFiles) {
+        await uploadAsset.mutateAsync({ noteId: saved.id, file });
+      }
+      setNoteTarget(null);
+      setPendingFiles([]);
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : '保存或上传失败，请重试');
     }
   };
 
@@ -227,8 +247,28 @@ export function GrowthInterests({ childId }: { childId: string }) {
                               <span>{note.authorRole === 'child' ? '🧒' : '👨‍👩‍👧'} {AUTHOR_ROLE_LABELS[note.authorRole] ?? note.authorRole}</span>
                             </div>
                             <p className="mt-1 whitespace-pre-wrap text-sm text-gray-700">{note.content}</p>
+                            {note.assets && note.assets.length > 0 && (
+                              <div className="mt-2 grid w-40 grid-cols-3 gap-1">
+                                {note.assets.map((asset, ai) => (
+                                  <AssetThumb key={asset.id} asset={asset} onClick={() => setViewingAssets({ assets: note.assets!, index: ai })} />
+                                ))}
+                              </div>
+                            )}
                           </div>
                           <div className="flex shrink-0 gap-1">
+                            {isParent && note.assets && note.assets.length > 0 && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-gray-400 hover:bg-gray-100"
+                                onClick={() => {
+                                  const last = note.assets![note.assets!.length - 1];
+                                  if (window.confirm(`删除附件「${last.fileName}」？`)) deleteAsset.mutate(last.id);
+                                }}
+                              >
+                                删附件
+                              </Button>
+                            )}
                             <Button variant="ghost" size="sm" onClick={() => openEditNote(interest, note)}>
                               修改
                             </Button>
@@ -393,22 +433,64 @@ export function GrowthInterests({ childId }: { childId: string }) {
               placeholder={isParent ? '练习情况、进步、作品或孩子的感受' : '今天我……'}
             />
           </label>
+          <div className="space-y-2">
+            <span className="block text-sm font-medium text-gray-700">作品/过程（可选）</span>
+            <input
+              type="file"
+              accept="image/*,video/*"
+              multiple
+              onChange={(event) => {
+                const files = Array.from(event.target.files ?? []);
+                setPendingFiles((current) => [...current, ...files].slice(0, 9));
+                event.target.value = '';
+              }}
+              className="block w-full text-sm text-gray-500 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-primary hover:file:bg-indigo-100"
+              aria-label="添加图片或视频"
+            />
+            {pendingFiles.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {pendingFiles.map((file, i) => (
+                  <span key={`${file.name}-${i}`} className="flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-600">
+                    {file.type.startsWith('video') ? '🎬' : '🖼️'} {file.name.length > 14 ? `${file.name.slice(0, 12)}…` : file.name}
+                    <button type="button" onClick={() => setPendingFiles((current) => current.filter((_, j) => j !== i))} className="text-gray-400 hover:text-red-500" aria-label={`移除 ${file.name}`}>&times;</button>
+                  </span>
+                ))}
+              </div>
+            )}
+            {editingNote?.assets && editingNote.assets.length > 0 && (
+              <div className="grid w-44 grid-cols-3 gap-1">
+                {editingNote.assets.map((asset, ai) => (
+                  <AssetThumb key={asset.id} asset={asset} onClick={() => setViewingAssets({ assets: editingNote.assets!, index: ai })} />
+                ))}
+              </div>
+            )}
+          </div>
           {!isParent && (
             <p className="text-xs text-indigo-500">🧒 以孩子身份记录，会标注"孩子"录入</p>
           )}
           {(createNote.isError || updateNote.isError) && (
             <p className="text-xs text-red-500">保存失败，请检查填写内容后重试</p>
           )}
+          {uploadError && <p className="text-xs text-red-500">{uploadError}</p>}
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="secondary" onClick={() => setNoteTarget(null)}>
               取消
             </Button>
-            <Button loading={createNote.isPending || updateNote.isPending} disabled={!noteFormValid} onClick={submitNote}>
+            <Button loading={createNote.isPending || updateNote.isPending || uploadAsset.isPending} disabled={!noteFormValid} onClick={() => void submitNote()}>
               保存
             </Button>
           </div>
         </div>
       </Modal>
+
+      {viewingAssets && (
+        <AssetViewer
+          assets={viewingAssets.assets}
+          index={viewingAssets.index}
+          onClose={() => setViewingAssets(null)}
+          onNavigate={(next) => setViewingAssets((current) => (current ? { ...current, index: next } : current))}
+        />
+      )}
     </div>
   );
 }

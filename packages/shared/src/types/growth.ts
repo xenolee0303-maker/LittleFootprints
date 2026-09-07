@@ -82,6 +82,14 @@ export type CreateInterestInput = {
 
 export type UpdateInterestInput = Partial<CreateInterestInput>;
 
+export interface MediaAssetInfo {
+  id: string;
+  kind: MediaKind;
+  fileName: string;
+  sizeBytes: number;
+  thumbnailUnavailable: boolean;
+}
+
 export interface InterestNote {
   id: string;
   interestId: string;
@@ -89,6 +97,7 @@ export interface InterestNote {
   type: InterestNoteType;
   content: string;
   authorRole: AuthorRole;
+  assets?: MediaAssetInfo[];
   createdAt: string;
   updatedAt: string;
 }

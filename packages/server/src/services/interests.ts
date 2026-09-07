@@ -13,6 +13,7 @@ import type {
 } from '@bloommate/shared';
 import { childExists } from './child-profile.js';
 import { markAiReportsStale } from './ai-reports.js';
+import { listAssetsByNotes } from './media-assets.js';
 
 function generateId(): string {
   return crypto.randomUUID();
@@ -62,11 +63,13 @@ export async function listInterests(childId: string): Promise<InterestWithNotes[
   const interests = (await db.select().from(interestTable).where(eq(interestTable.childId, childId)).all()).map(deserializeInterest);
   if (interests.length === 0) return [];
 
-  const notes = (await db
+  const rawNotes = (await db
     .select()
     .from(interestNoteTable)
     .where(inArray(interestNoteTable.interestId, interests.map((i) => i.id)))
     .all()).map(deserializeNote);
+  const assetsByNote = await listAssetsByNotes(rawNotes.map((n) => n.id));
+  const notes: InterestNote[] = rawNotes.map((note) => ({ ...note, assets: assetsByNote.get(note.id) ?? [] }));
   const notesByInterest = new Map<string, InterestNote[]>();
   for (const note of notes) {
     const list = notesByInterest.get(note.interestId) ?? [];
@@ -127,8 +130,11 @@ export async function deleteInterest(id: string): Promise<boolean> {
 
 export async function listNotes(interestId: string): Promise<InterestNote[] | null> {
   if (!(await getInterest(interestId))) return null;
-  const rows = await db.select().from(interestNoteTable).where(eq(interestNoteTable.interestId, interestId)).all();
-  return rows.map(deserializeNote).sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+  const rows = (await db.select().from(interestNoteTable).where(eq(interestNoteTable.interestId, interestId)).all()).map(deserializeNote);
+  const assetsByNote = await listAssetsByNotes(rows.map((n) => n.id));
+  return rows
+    .map((note): InterestNote => ({ ...note, assets: assetsByNote.get(note.id) ?? [] }))
+    .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
 }
 
 export async function getNote(id: string): Promise<InterestNote | null> {
@@ -152,7 +158,7 @@ export async function createNote(interestId: string, input: CreateInterestNoteIn
   };
   await db.insert(interestNoteTable).values(note).run();
   await markStaleForNote(interestId, input.date);
-  return note;
+  return { ...note, assets: [] };
 }
 
 export async function updateNote(id: string, input: UpdateInterestNoteInput): Promise<InterestNote | null> {
@@ -166,7 +172,8 @@ export async function updateNote(id: string, input: UpdateInterestNoteInput): Pr
   };
   await db.update(interestNoteTable).set(updated).where(eq(interestNoteTable.id, id)).run();
   await markStaleForNote(existing.interestId, existing.date, updated.date);
-  return updated;
+  const assets = (await listAssetsByNotes([id])).get(id) ?? [];
+  return { ...updated, assets };
 }
 
 export async function deleteNote(id: string): Promise<boolean> {

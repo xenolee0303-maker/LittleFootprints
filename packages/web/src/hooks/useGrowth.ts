@@ -184,3 +184,34 @@ export function useChildSummaries(childId: string | undefined) {
     staleTime: 10 * 60 * 1000,
   });
 }
+
+// ── Interest note assets (uploaded works) ────────────────
+
+export function useUploadAsset() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ noteId, file }: { noteId: string; file: File }) => {
+      const body = new FormData();
+      body.append('file', file);
+      const response = await fetch(`/api/interest-notes/${encodeURIComponent(noteId)}/assets`, {
+        method: 'POST',
+        body,
+        credentials: 'include',
+      });
+      if (!response.ok) {
+        const detail = await response.json().catch(() => null);
+        throw new Error(detail?.message ?? '上传失败');
+      }
+      return response.json();
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['interests'] }),
+  });
+}
+
+export function useDeleteAsset() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.delete<{ success: boolean }>(`/assets/${encodeURIComponent(id)}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['interests'] }),
+  });
+}

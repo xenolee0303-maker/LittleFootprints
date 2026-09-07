@@ -10,6 +10,7 @@ import * as growthMeasurementSchema from './schema/growth-measurement.js';
 import * as interestSchema from './schema/interest.js';
 import * as interestNoteSchema from './schema/interest-note.js';
 import * as growthEventSchema from './schema/growth-event.js';
+import * as mediaAssetSchema from './schema/media-asset.js';
 import * as aiProviderConfigSchema from './schema/ai-provider-config.js';
 import * as aiAnalysisReportSchema from './schema/ai-analysis-report.js';
 
@@ -29,6 +30,7 @@ const schema = {
   ...interestSchema,
   ...interestNoteSchema,
   ...growthEventSchema,
+  ...mediaAssetSchema,
   ...aiProviderConfigSchema,
   ...aiAnalysisReportSchema,
 };

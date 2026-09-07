@@ -12,9 +12,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@fastify/cors": "^10.0.0",
-    "@fastify/static": "^9.1.3",
     "@bloommate/shared": "*",
+    "@fastify/cors": "^10.0.0",
+    "@fastify/multipart": "^10.1.1",
+    "@fastify/static": "^9.1.3",
     "better-sqlite3": "^11.0.0",
     "drizzle-orm": "^0.38.0",
     "fastify": "^5.0.0",

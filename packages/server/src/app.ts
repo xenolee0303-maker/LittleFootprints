@@ -1,5 +1,6 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
+import multipart from '@fastify/multipart';
 import fastifyStatic from '@fastify/static';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -11,6 +12,7 @@ import { growthMeasurementRoutes } from './routes/growth-measurements.js';
 import { interestRoutes } from './routes/interests.js';
 import { growthEventRoutes } from './routes/growth-events.js';
 import { mediaRoutes } from './routes/media.js';
+import { assetRoutes } from './routes/assets.js';
 import { aiProviderRoutes } from './routes/ai-provider.js';
 import { aiReportsRoutes } from './routes/ai-reports.js';
 import { aiConversationRoutes } from './routes/ai-conversations.js';
@@ -53,7 +55,9 @@ export async function buildApp(options: BuildAppOptions = {}) {
   await app.register(growthMeasurementRoutes);
   await app.register(interestRoutes);
   await app.register(growthEventRoutes);
+  await app.register(multipart, { limits: { files: 1 } });
   await app.register(mediaRoutes);
+  await app.register(assetRoutes);
   await app.register(aiProviderRoutes);
   await app.register(aiReportsRoutes);
   await app.register(aiConversationRoutes);
