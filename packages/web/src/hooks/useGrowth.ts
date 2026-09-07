@@ -215,3 +215,24 @@ export function useDeleteAsset() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['interests'] }),
   });
 }
+
+export function useUploadEventAsset() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ eventId, file }: { eventId: string; file: File }) => {
+      const body = new FormData();
+      body.append('file', file);
+      const response = await fetch(`/api/growth-events/${encodeURIComponent(eventId)}/assets`, {
+        method: 'POST',
+        body,
+        credentials: 'include',
+      });
+      if (!response.ok) {
+        const detail = await response.json().catch(() => null);
+        throw new Error(detail?.message ?? '上传失败');
+      }
+      return response.json();
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['growth-events'] }),
+  });
+}

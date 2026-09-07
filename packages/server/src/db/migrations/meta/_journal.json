@@ -15,6 +15,13 @@
             "when": 1788770283428,
             "tag": "0001_media_asset",
             "breakpoints": true
+        },
+        {
+            "idx": 2,
+            "version": "7",
+            "when": 1788771496585,
+            "tag": "0002_media_asset_event",
+            "breakpoints": true
         }
     ]
 }

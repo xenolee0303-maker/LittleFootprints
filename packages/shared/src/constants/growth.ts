@@ -2,6 +2,7 @@ export const INTEREST_CATEGORY_LABELS: Record<string, string> = {
   art: '艺术',
   sport: '体育',
   tech: '科技',
+  learning: '学习',
   reading: '阅读',
   life: '生活',
   other: '其他',

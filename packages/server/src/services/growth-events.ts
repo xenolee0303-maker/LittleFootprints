@@ -4,6 +4,7 @@ import { eq } from 'drizzle-orm';
 import type { GrowthEvent, CreateGrowthEventInput, UpdateGrowthEventInput } from '@bloommate/shared';
 import { childExists } from './child-profile.js';
 import { markAiReportsStale } from './ai-reports.js';
+import { listAssetsByEvents } from './media-assets.js';
 
 function generateId(): string {
   return crypto.randomUUID();
@@ -28,12 +29,16 @@ export async function listEvents(childId?: string): Promise<GrowthEvent[]> {
   const rows = await db.select().from(growthEventTable).all();
   const events = rows.map(deserializeEvent);
   const filtered = childId ? events.filter((e) => e.participantChildIds.includes(childId)) : events;
-  return filtered.sort((a, b) => (a.startDate < b.startDate ? 1 : -1));
+  const sorted = filtered.sort((a, b) => (a.startDate < b.startDate ? 1 : -1));
+  const assetsByEvent = await listAssetsByEvents(sorted.map((e) => e.id));
+  return sorted.map((e) => ({ ...e, assets: assetsByEvent.get(e.id) ?? [] }));
 }
 
 export async function getEvent(id: string): Promise<GrowthEvent | null> {
   const row = await db.select().from(growthEventTable).where(eq(growthEventTable.id, id)).get();
-  return row ? deserializeEvent(row) : null;
+  if (!row) return null;
+  const assets = (await listAssetsByEvents([id])).get(id) ?? [];
+  return { ...deserializeEvent(row), assets };
 }
 
 export async function createEvent(input: CreateGrowthEventInput): Promise<GrowthEvent | null> {

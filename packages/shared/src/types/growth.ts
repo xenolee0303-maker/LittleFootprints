@@ -1,6 +1,14 @@
 export type AuthorRole = 'parent' | 'child';
 
-export type InterestCategory = 'art' | 'sport' | 'tech' | 'reading' | 'life' | 'other';
+export interface MediaAssetInfo {
+  id: string;
+  kind: MediaKind;
+  fileName: string;
+  sizeBytes: number;
+  thumbnailUnavailable: boolean;
+}
+
+export type InterestCategory = 'art' | 'sport' | 'tech' | 'reading' | 'learning' | 'life' | 'other';
 
 export type InterestStatus = 'exploring' | 'active' | 'paused' | 'ended';
 
@@ -82,14 +90,6 @@ export type CreateInterestInput = {
 
 export type UpdateInterestInput = Partial<CreateInterestInput>;
 
-export interface MediaAssetInfo {
-  id: string;
-  kind: MediaKind;
-  fileName: string;
-  sizeBytes: number;
-  thumbnailUnavailable: boolean;
-}
-
 export interface InterestNote {
   id: string;
   interestId: string;
@@ -123,6 +123,7 @@ export interface GrowthEvent {
   authorRole: AuthorRole;
   /** Relative directory path inside the media library this event is bound to. */
   mediaDirectory: string | null;
+  assets?: MediaAssetInfo[];
   createdAt: string;
   updatedAt: string;
 }

@@ -1,5 +1,6 @@
 import type { FastifyInstance, FastifyReply } from 'fastify';
 import { getNote } from '../services/interests.js';
+import { getEvent } from '../services/growth-events.js';
 import {
   attachAsset,
   getAsset,
@@ -38,7 +39,33 @@ export async function assetRoutes(app: FastifyInstance) {
       if (buffer.byteLength > maxBytes) {
         return reply.status(413).send({ message: `文件超过大小限制（${Math.round(maxBytes / 1024 / 1024)}MB）` });
       }
-      const asset = await attachAsset(noteId, file.filename, buffer);
+      const asset = await attachAsset({ noteId }, file.filename, buffer);
+      return reply.status(201).send(asset);
+    } catch (error) {
+      return sendAssetError(reply, error);
+    }
+  });
+
+  // POST /api/growth-events/:eventId/assets — multipart upload (single file)
+  app.post('/api/growth-events/:eventId/assets', async (request, reply) => {
+    const { eventId } = request.params as { eventId: string };
+    try {
+      if (!(await getEvent(eventId))) {
+        return reply.status(404).send({ message: '成长事件不存在' });
+      }
+      const file = await request.file();
+      if (!file) {
+        return reply.status(400).send({ message: '缺少文件' });
+      }
+      const maxBytes = Math.max(1, Number(process.env.MAX_ASSET_SIZE_MB ?? 200)) * 1024 * 1024;
+      const buffer = await file.toBuffer();
+      if (buffer.byteLength === 0) {
+        return reply.status(400).send({ message: '文件为空' });
+      }
+      if (buffer.byteLength > maxBytes) {
+        return reply.status(413).send({ message: `文件超过大小限制（${Math.round(maxBytes / 1024 / 1024)}MB）` });
+      }
+      const asset = await attachAsset({ eventId }, file.filename, buffer);
       return reply.status(201).send(asset);
     } catch (error) {
       return sendAssetError(reply, error);

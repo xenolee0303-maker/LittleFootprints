@@ -34,6 +34,8 @@ export function assetKindFor(fileName: string): MediaKind | null {
   return null;
 }
 
+type MediaAssetRow = { id: string; noteId: string | null; eventId: string | null; kind: string; fileName: string; storagePath: string; sizeBytes: number; createdAt: string };
+
 function toInfo(row: { id: string; kind: string; fileName: string; sizeBytes: number; storagePath: string }): MediaAssetInfo {
   const ext = path.extname(row.fileName).toLowerCase();
   return {
@@ -45,13 +47,17 @@ function toInfo(row: { id: string; kind: string; fileName: string; sizeBytes: nu
   };
 }
 
-export async function attachAsset(noteId: string, fileName: string, data: Buffer): Promise<MediaAssetInfo> {
+export type AssetOwner = { noteId: string } | { eventId: string };
+
+export async function attachAsset(owner: AssetOwner, fileName: string, data: Buffer): Promise<MediaAssetInfo> {
   const kind = assetKindFor(fileName);
   if (!kind) throw new AssetError(`不支持的文件类型：${path.extname(fileName) || '(无扩展名)'}。支持常见图片和 mp4/mov 等视频`, 400);
 
-  const existing = await db.select({ id: mediaAssetTable.id }).from(mediaAssetTable).where(eq(mediaAssetTable.noteId, noteId)).all();
+  const ownerColumn = 'noteId' in owner ? mediaAssetTable.noteId : mediaAssetTable.eventId;
+  const ownerId = 'noteId' in owner ? owner.noteId : owner.eventId;
+  const existing = await db.select({ id: mediaAssetTable.id }).from(mediaAssetTable).where(eq(ownerColumn, ownerId)).all();
   if (existing.length >= MAX_ASSETS_PER_NOTE) {
-    throw new AssetError(`一条进展最多 ${MAX_ASSETS_PER_NOTE} 个附件`, 400);
+    throw new AssetError(`最多 ${MAX_ASSETS_PER_NOTE} 个附件`, 400);
   }
 
   const id = crypto.randomUUID();
@@ -63,25 +69,35 @@ export async function attachAsset(noteId: string, fileName: string, data: Buffer
   await writeFile(absolute, data);
 
   const now = new Date().toISOString();
-  const row = { id, noteId, kind, fileName: safeName, storagePath, sizeBytes: data.byteLength, createdAt: now };
+  const row = { id, noteId: 'noteId' in owner ? owner.noteId : null, eventId: 'eventId' in owner ? owner.eventId : null, kind, fileName: safeName, storagePath, sizeBytes: data.byteLength, createdAt: now };
   await db.insert(mediaAssetTable).values(row).run();
   return toInfo(row);
 }
 
 export async function listAssetsByNotes(noteIds: string[]): Promise<Map<string, MediaAssetInfo[]>> {
+  return collectAssets(mediaAssetTable.noteId, noteIds);
+}
+
+export async function listAssetsByEvents(eventIds: string[]): Promise<Map<string, MediaAssetInfo[]>> {
+  return collectAssets(mediaAssetTable.eventId, eventIds);
+}
+
+async function collectAssets(column: typeof mediaAssetTable.noteId | typeof mediaAssetTable.eventId, ids: string[]): Promise<Map<string, MediaAssetInfo[]>> {
   const result = new Map<string, MediaAssetInfo[]>();
-  if (noteIds.length === 0) return result;
-  const rows = await db.select().from(mediaAssetTable).where(inArray(mediaAssetTable.noteId, noteIds)).all();
+  if (ids.length === 0) return result;
+  const rows: MediaAssetRow[] = await db.select().from(mediaAssetTable).where(inArray(column, ids)).all();
   for (const row of rows.sort((a, b) => (a.createdAt < b.createdAt ? -1 : 1))) {
-    const list = result.get(row.noteId) ?? [];
+    const ownerId = row.noteId ?? row.eventId;
+    if (!ownerId) continue;
+    const list = result.get(ownerId) ?? [];
     list.push(toInfo(row));
-    result.set(row.noteId, list);
+    result.set(ownerId, list);
   }
   return result;
 }
 
 export async function getAsset(id: string) {
-  const row = await db.select().from(mediaAssetTable).where(eq(mediaAssetTable.id, id)).get();
+  const row: MediaAssetRow | undefined = await db.select().from(mediaAssetTable).where(eq(mediaAssetTable.id, id)).get();
   if (!row) return null;
   return { row, info: toInfo(row), absolutePath: path.join(getUploadsRoot(), row.storagePath) };
 }

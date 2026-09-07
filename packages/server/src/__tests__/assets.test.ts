@@ -169,3 +169,52 @@ test('assets are removed with the owning note', async (t) => {
 
   await app.close();
 });
+
+test('growth event assets upload, aggregate and cascade', async (t) => {
+  process.env.UPLOADS_DIR = uploadsRoot;
+  const { buildApp } = await import('../app.js');
+  const app = await buildApp();
+  const sharp = (await import('sharp')).default;
+  const png = await sharp({ create: { width: 50, height: 50, channels: 3, background: 'blue' } }).png().toBuffer();
+
+  const childId = await createChild(app);
+  const created = await app.inject({
+    method: 'POST', url: '/api/growth-events',
+    payload: { type: 'competition', title: '英语演讲比赛', startDate: '2026-09-01', participantChildIds: [childId] },
+  });
+  const eventId = JSON.parse(created.payload).id;
+
+  await t.test('upload to event and see it in list and detail', async () => {
+    const uploaded = await app.inject({
+      method: 'POST', url: `/api/growth-events/${eventId}/assets`,
+      ...multipartBody('file', '演讲视频.mp4', 'video/mp4', Buffer.alloc(1024, 9)),
+    });
+    assert.strictEqual(uploaded.statusCode, 201, uploaded.payload);
+    const assetId = JSON.parse(uploaded.payload).id;
+
+    const list = await app.inject({ method: 'GET', url: '/api/growth-events' });
+    const event = JSON.parse(list.payload).find((e: any) => e.id === eventId);
+    assert.equal(event.assets.length, 1);
+    assert.equal(event.assets[0].kind, 'video');
+
+    const streamed = await app.inject({ method: 'GET', url: `/api/assets/${assetId}`, headers: { range: 'bytes=0-255' } });
+    assert.strictEqual(streamed.statusCode, 206);
+  });
+
+  await t.test('upload to missing event 404; deleting event cascades assets', async () => {
+    const missing = await app.inject({
+      method: 'POST', url: '/api/growth-events/nope/assets',
+      ...multipartBody('file', 'x.png', 'image/png', png),
+    });
+    assert.strictEqual(missing.statusCode, 404);
+
+    const list = await app.inject({ method: 'GET', url: '/api/growth-events' });
+    const event = JSON.parse(list.payload).find((e: any) => e.id === eventId);
+    const assetId = event.assets[0].id;
+    await app.inject({ method: 'DELETE', url: `/api/growth-events/${eventId}` });
+    const gone = await app.inject({ method: 'GET', url: `/api/assets/${assetId}` });
+    assert.strictEqual(gone.statusCode, 404);
+  });
+
+  await app.close();
+});

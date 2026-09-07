@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
 import type { Child, GrowthEvent, GrowthEventType } from '@bloommate/shared';
 import { GROWTH_EVENT_TYPE_LABELS } from '@bloommate/shared';
-import { useGrowthEvents, useCreateGrowthEvent, useUpdateGrowthEvent, useDeleteGrowthEvent } from '../../hooks/useGrowth';
+import { useGrowthEvents, useCreateGrowthEvent, useUpdateGrowthEvent, useDeleteGrowthEvent, useUploadEventAsset, useDeleteAsset } from '../../hooks/useGrowth';
+import { AssetViewer, AssetThumb } from './AssetViewer';
+import type { MediaAssetInfo } from '@bloommate/shared';
 import { usePerspective } from '../../lib/perspective';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -51,6 +53,11 @@ export function GrowthTimeline({ children, childId }: { children: Child[]; child
   const [editing, setEditing] = useState<GrowthEvent | null>(null);
   const [creating, setCreating] = useState(false);
   const [galleryEvent, setGalleryEvent] = useState<GrowthEvent | null>(null);
+  const uploadAsset = useUploadEventAsset();
+  const deleteAsset = useDeleteAsset();
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [viewingAssets, setViewingAssets] = useState<{ assets: MediaAssetInfo[]; index: number } | null>(null);
 
   const initialForm = useMemo<EventFormState>(
     () => ({
@@ -69,6 +76,8 @@ export function GrowthTimeline({ children, childId }: { children: Child[]; child
 
   const openCreate = () => {
     setForm(initialForm);
+    setPendingFiles([]);
+    setUploadError(null);
     setCreating(true);
   };
 
@@ -83,6 +92,8 @@ export function GrowthTimeline({ children, childId }: { children: Child[]; child
       participantChildIds: event.participantChildIds,
       mediaDirectory: event.mediaDirectory,
     });
+    setPendingFiles([]);
+    setUploadError(null);
     setEditing(event);
   };
 
@@ -91,7 +102,7 @@ export function GrowthTimeline({ children, childId }: { children: Child[]; child
     setEditing(null);
   };
 
-  const submitForm = () => {
+  const submitForm = async () => {
     const payload = {
       type: form.type,
       title: form.title,
@@ -102,10 +113,18 @@ export function GrowthTimeline({ children, childId }: { children: Child[]; child
       participantChildIds: form.participantChildIds,
       mediaDirectory: form.mediaDirectory,
     };
-    if (editing) {
-      updateEvent.mutate({ id: editing.id, ...payload }, { onSuccess: closeForm });
-    } else {
-      createEvent.mutate(payload, { onSuccess: closeForm });
+    setUploadError(null);
+    try {
+      const saved = editing
+        ? await updateEvent.mutateAsync({ id: editing.id, ...payload })
+        : await createEvent.mutateAsync(payload);
+      for (const file of pendingFiles) {
+        await uploadAsset.mutateAsync({ eventId: saved.id, file });
+      }
+      closeForm();
+      setPendingFiles([]);
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : '保存或上传失败，请重试');
     }
   };
 
@@ -150,6 +169,13 @@ export function GrowthTimeline({ children, childId }: { children: Child[]; child
                   {event.mediaDirectory && (
                     <MediaCoverStrip directory={event.mediaDirectory} onOpen={() => setGalleryEvent(event)} />
                   )}
+                  {event.assets && event.assets.length > 0 && (
+                    <div className="mt-2 grid w-48 grid-cols-4 gap-1">
+                      {event.assets.map((asset, ai) => (
+                        <AssetThumb key={asset.id} asset={asset} onClick={() => setViewingAssets({ assets: event.assets!, index: ai })} />
+                      ))}
+                    </div>
+                  )}
                   <p className="mt-2 text-xs text-gray-400">
                     {event.participantChildIds
                       .map((id) => children.find((child) => child.id === id)?.name)
@@ -159,6 +185,19 @@ export function GrowthTimeline({ children, childId }: { children: Child[]; child
                 </div>
                 {isParent && (
                   <div className="flex shrink-0 gap-1">
+                    {event.assets && event.assets.length > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-gray-400 hover:bg-gray-100"
+                        onClick={() => {
+                          const last = event.assets![event.assets!.length - 1];
+                          if (window.confirm(`删除附件「${last.fileName}」？`)) deleteAsset.mutate(last.id);
+                        }}
+                      >
+                        删附件
+                      </Button>
+                    )}
                     <Button variant="ghost" size="sm" onClick={() => openEdit(event)}>
                       修改
                     </Button>
@@ -239,6 +278,38 @@ export function GrowthTimeline({ children, childId }: { children: Child[]; child
               onChange={(directory) => setForm((f) => ({ ...f, mediaDirectory: directory }))}
             />
           </div>
+          <div className="space-y-2">
+            <span className="block text-sm font-medium text-gray-700">现场照片/视频（可选）</span>
+            <input
+              type="file"
+              accept="image/*,video/*"
+              multiple
+              onChange={(event) => {
+                const files = Array.from(event.target.files ?? []);
+                setPendingFiles((current) => [...current, ...files].slice(0, 9));
+                event.target.value = '';
+              }}
+              className="block w-full text-sm text-gray-500 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-primary hover:file:bg-indigo-100"
+              aria-label="添加现场照片或视频"
+            />
+            {pendingFiles.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {pendingFiles.map((file, i) => (
+                  <span key={`${file.name}-${i}`} className="flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-600">
+                    {file.type.startsWith('video') ? '🎬' : '🖼️'} {file.name.length > 14 ? `${file.name.slice(0, 12)}…` : file.name}
+                    <button type="button" onClick={() => setPendingFiles((current) => current.filter((_, j) => j !== i))} className="text-gray-400 hover:text-red-500" aria-label={`移除 ${file.name}`}>&times;</button>
+                  </span>
+                ))}
+              </div>
+            )}
+            {editing?.assets && editing.assets.length > 0 && (
+              <div className="grid w-48 grid-cols-4 gap-1">
+                {editing.assets.map((asset, ai) => (
+                  <AssetThumb key={asset.id} asset={asset} onClick={() => setViewingAssets({ assets: editing.assets!, index: ai })} />
+                ))}
+              </div>
+            )}
+          </div>
           <div className="space-y-1">
             <span className="block text-sm font-medium text-gray-700">参加的孩子</span>
             <div className="flex gap-2">
@@ -273,16 +344,26 @@ export function GrowthTimeline({ children, childId }: { children: Child[]; child
               {(createEvent.error ?? updateEvent.error)?.message || '保存失败，请检查填写内容后重试'}
             </p>
           )}
+          {uploadError && <p className="text-xs text-red-500">{uploadError}</p>}
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="secondary" onClick={closeForm}>
               取消
             </Button>
-            <Button loading={createEvent.isPending || updateEvent.isPending} disabled={!formValid} onClick={submitForm}>
+            <Button loading={createEvent.isPending || updateEvent.isPending || uploadAsset.isPending} disabled={!formValid} onClick={() => void submitForm()}>
               保存
             </Button>
           </div>
         </div>
       </Modal>
+
+      {viewingAssets && (
+        <AssetViewer
+          assets={viewingAssets.assets}
+          index={viewingAssets.index}
+          onClose={() => setViewingAssets(null)}
+          onNavigate={(next) => setViewingAssets((current) => (current ? { ...current, index: next } : current))}
+        />
+      )}
 
       {galleryEvent && galleryEvent.mediaDirectory && (
         <MediaGallery
