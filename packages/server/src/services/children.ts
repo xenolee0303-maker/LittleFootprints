@@ -1,0 +1,37 @@
+import { db } from '../db/index.js';
+import { childTable } from '../db/schema/child.js';
+import { eq } from 'drizzle-orm';
+import type { Child, CreateChildInput, UpdateChildInput } from '@bloommate/shared';
+
+function generateId(): string {
+  return crypto.randomUUID();
+}
+
+export async function listChildren(): Promise<Child[]> {
+  return db.select().from(childTable).all();
+}
+
+export async function getChild(id: string): Promise<Child | null> {
+  const row = await db.select().from(childTable).where(eq(childTable.id, id)).get();
+  return row ?? null;
+}
+
+export async function createChild(input: CreateChildInput): Promise<Child> {
+  const now = new Date().toISOString();
+  const child: Child = { id: generateId(), name: input.name.trim(), createdAt: now, updatedAt: now };
+  await db.insert(childTable).values(child).run();
+  return child;
+}
+
+export async function updateChild(id: string, input: UpdateChildInput): Promise<Child | null> {
+  const existing = await getChild(id);
+  if (!existing) return null;
+  const updated: Child = { ...existing, ...input, name: (input.name ?? existing.name).trim(), updatedAt: new Date().toISOString() };
+  await db.update(childTable).set(updated).where(eq(childTable.id, id)).run();
+  return updated;
+}
+
+export async function deleteChild(id: string): Promise<boolean> {
+  const result = await db.delete(childTable).where(eq(childTable.id, id)).run();
+  return result.changes > 0;
+}

@@ -1,0 +1,25 @@
+services:
+  bloommate:
+    build: .
+    container_name: bloommate
+    ports:
+      - "3002:3002"
+    volumes:
+      - ./data:/app/data
+      # 照片库目录（只读）。在 .env 中设置 MEDIA_HOST_PATH 为真实路径后自动挂载；
+      # 未设置时挂载空的 ./media 目录，照片功能显示"未配置"。
+      - ${MEDIA_HOST_PATH:-./media}:/app/media:ro
+    environment:
+      NODE_ENV: production
+      TZ: Asia/Shanghai
+      DATABASE_PATH: /app/data/bloommate.db
+      MEDIA_LIBRARY_PATH: /app/media
+      FAMILY_PIN: ${FAMILY_PIN:?请先在部署目录的 .env 中设置 6 位 FAMILY_PIN}
+      AI_CONFIG_ENCRYPTION_KEY: ${AI_CONFIG_ENCRYPTION_KEY:?请先在部署目录的 .env 中设置 AI_CONFIG_ENCRYPTION_KEY}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3002/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

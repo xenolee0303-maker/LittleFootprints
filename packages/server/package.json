@@ -1,0 +1,29 @@
+{
+  "name": "@bloommate/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc && cp -r src/db/migrations dist/db/",
+    "start": "tsx dist/index.js",
+    "pretest": "npm run build -w @bloommate/shared",
+    "test": "NODE_ENV=test node --import tsx --test \"src/**/*.test.ts\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@fastify/cors": "^10.0.0",
+    "@fastify/static": "^9.1.3",
+    "@bloommate/shared": "*",
+    "better-sqlite3": "^11.0.0",
+    "drizzle-orm": "^0.38.0",
+    "fastify": "^5.0.0",
+    "sharp": "^0.34.4",
+    "tsx": "^4.22.4"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.0",
+    "drizzle-kit": "^0.30.0",
+    "typescript": "^5.7.0"
+  }
+}
