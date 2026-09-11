@@ -4,12 +4,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Child } from '@littlefootprints/shared';
 import { GrowthPage } from './GrowthPage';
 
-const { mockedUseChildren, mockedUsePerspective, mockedUseGrowthEvents, mockedUseChildSummaries, mockedUseInterests } = vi.hoisted(() => ({
+const { mockedUseChildren, mockedUsePerspective, mockedUseGrowthEvents, mockedUseChildSummaries, mockedUseInterests, mockedUseJournal } = vi.hoisted(() => ({
   mockedUseChildren: vi.fn(),
   mockedUsePerspective: vi.fn(),
   mockedUseGrowthEvents: vi.fn(),
   mockedUseChildSummaries: vi.fn(),
   mockedUseInterests: vi.fn(),
+  mockedUseJournal: vi.fn(),
 }));
 
 vi.mock('../hooks/useChildren', () => ({
@@ -27,6 +28,11 @@ vi.mock('../hooks/useGrowth', async (importOriginal) => {
     useGrowthEvents: mockedUseGrowthEvents,
     useChildSummaries: mockedUseChildSummaries,
     useInterests: mockedUseInterests,
+    useJournal: mockedUseJournal,
+    useCreateJournal: () => ({ mutateAsync: vi.fn(), isPending: false, isError: false }),
+    useUpdateJournal: () => ({ mutateAsync: vi.fn(), isPending: false, isError: false }),
+    useDeleteJournal: () => ({ mutate: vi.fn(), isPending: false, isError: false }),
+    useUploadJournalAsset: () => ({ mutateAsync: vi.fn(), isPending: false, isError: false }),
     useProfile: () => ({ data: undefined }),
     useMeasurements: () => ({ data: [] }),
     useCreateGrowthEvent: () => ({ mutate: vi.fn(), isPending: false, isError: false }),
@@ -77,6 +83,7 @@ describe('GrowthPage', () => {
     mockedUseGrowthEvents.mockReturnValue({ data: [], isLoading: false });
     mockedUseChildSummaries.mockReturnValue({ data: { summaries: [] } });
     mockedUseInterests.mockReturnValue({ data: [], isLoading: false });
+    mockedUseJournal.mockReturnValue({ data: [], isLoading: false });
   });
 
   it('renders timeline section with add button in parent perspective', async () => {
@@ -192,6 +199,24 @@ describe('GrowthPage', () => {
     await user.click(imageThumb);
     expect(await screen.findByRole('dialog')).toBeInTheDocument();
     expect(screen.getByText(/讲解\.mp4|1 \/ 2/)).toBeInTheDocument();
+  });
+
+  it('shows the daily journal section with entries grouped and mood', async () => {
+    mockedUseJournal.mockReturnValue({
+      data: [
+        {
+          id: 'j1', childId: child.id, date: '2026-09-07', content: '我学会跳绳了！',
+          mood: 'great', authorRole: 'child', assets: [], createdAt: '', updatedAt: '',
+        },
+      ],
+      isLoading: false,
+    });
+    const { userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    renderPage();
+    await user.click(screen.getByRole('button', { name: '日志' }));
+    expect(await screen.findByText('我学会跳绳了！')).toBeInTheDocument();
+    expect(screen.getByText('特别开心 😄')).toBeInTheDocument();
   });
 
   it('switches to interests and profile sections', async () => {

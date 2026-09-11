@@ -37,3 +37,11 @@ export const AUTHOR_ROLE_LABELS: Record<string, string> = {
   parent: '家长',
   child: '孩子',
 };
+
+export const JOURNAL_MOOD_LABELS: Record<string, string> = {
+  great: '特别开心 😄',
+  good: '开心 🙂',
+  normal: '一般 😐',
+  tired: '有点累 😪',
+  sad: '不太开心 😢',
+};

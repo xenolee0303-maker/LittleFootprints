@@ -176,3 +176,28 @@ export interface ChildWeeklySummary {
   childSummary: { title: string; text: string; goal: string };
   generatedAt: string | null;
 }
+
+// ── Daily journal ────────────────────────────────────────
+
+export type JournalMood = 'great' | 'good' | 'normal' | 'tired' | 'sad';
+
+export interface DailyJournal {
+  id: string;
+  childId: string;
+  date: string; // YYYY-MM-DD
+  content: string;
+  mood: JournalMood | null;
+  authorRole: AuthorRole;
+  assets?: MediaAssetInfo[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type CreateDailyJournalInput = {
+  date: string;
+  content: string;
+  mood?: JournalMood | null;
+  authorRole: AuthorRole;
+};
+
+export type UpdateDailyJournalInput = Partial<CreateDailyJournalInput>;

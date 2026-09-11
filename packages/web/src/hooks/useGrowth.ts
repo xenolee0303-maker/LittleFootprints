@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../api/client';
 import type {
+  DailyJournal,
   ChildWeeklySummary,
   ChildProfile,
   GrowthMeasurement,
@@ -234,5 +235,62 @@ export function useUploadEventAsset() {
       return response.json();
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['growth-events'] }),
+  });
+}
+
+// ── Daily journal ────────────────────────────────────────
+
+export function useJournal(childId: string | undefined) {
+  return useQuery({
+    queryKey: ['journal', childId],
+    queryFn: () => api.get<DailyJournal[]>(`/children/${childId}/journal`),
+    enabled: !!childId,
+  });
+}
+
+export function useCreateJournal(childId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { date: string; content: string; mood?: string | null; authorRole: 'parent' | 'child' }) =>
+      api.post<DailyJournal>(`/children/${childId}/journal`, input),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['journal', childId] }),
+  });
+}
+
+export function useUpdateJournal() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...input }: { id: string } & Partial<{ date: string; content: string; mood?: string | null }>) =>
+      api.patch<DailyJournal>(`/journal/${id}`, input),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['journal'] }),
+  });
+}
+
+export function useDeleteJournal() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.delete<{ success: boolean }>(`/journal/${id}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['journal'] }),
+  });
+}
+
+export function useUploadJournalAsset() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ entryId, file }: { entryId: string; file: File }) => {
+      const body = new FormData();
+      body.append('file', file);
+      const response = await fetch(`/api/journal/${encodeURIComponent(entryId)}/assets`, {
+        method: 'POST',
+        body,
+        credentials: 'include',
+      });
+      if (!response.ok) {
+        const detail = await response.json().catch(() => null);
+        throw new Error(detail?.message ?? '上传失败');
+      }
+      return response.json();
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['journal'] }),
   });
 }

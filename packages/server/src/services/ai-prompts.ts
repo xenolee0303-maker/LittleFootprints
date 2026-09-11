@@ -12,7 +12,7 @@ function json(value: unknown): string { return JSON.stringify(value); }
 function messages(system: string, user: string): AiChatMessage[] { return [{ role: 'system', content: system }, { role: 'user', content: user }]; }
 
 export function buildWeeklyReportPrompt(input: AiReportInput): AiChatMessage[] {
-  const growthRule = input.growth ? '\n快照 growth 字段包含孩子背景和兴趣列表：growth.background/schoolStage 仅供理解孩子处境，不是证据；growth.interests[].recentFourWeekNoteCounts 表示该兴趣近四周（下标 0 为统计周）的进展条数，可用于讨论坚持与节奏；兴趣进展与成长事件的分析必须引用对应 evidenceIds。' : '';
+  const growthRule = input.growth ? '\n快照 growth 字段包含孩子背景和兴趣列表：growth.background/schoolStage 仅供理解孩子处境，不是证据；growth.interests[].recentFourWeekNoteCounts 表示该兴趣近四周（下标 0 为统计周）的进展条数，可用于讨论坚持与节奏；日志（journal 证据）记录了孩子每天的状态和心情，可用于观察情绪与生活节奏；兴趣进展、成长事件与日志的分析必须引用对应 evidenceIds。' : '';
   return messages(
     `${reportRules}\n${reportSchema}\n周报可向家长解释兴趣爱好和成长经历（旅游、比赛、演出、聚会等）中的表现与趋势；数据不足时明确说不能判断。${growthRule}`,
     `生成本周家长周报。快照（仅限当前孩子）:\n${json(input)}`,

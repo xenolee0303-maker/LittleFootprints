@@ -5,15 +5,17 @@ import { GrowthTimeline } from '../components/growth/GrowthTimeline';
 import { GrowthInterests } from '../components/growth/GrowthInterests';
 import { GrowthProfile } from '../components/growth/GrowthProfile';
 import { ChildWeeklySummaryCard } from '../components/growth/ChildWeeklySummary';
+import { DailyJournalSection } from '../components/growth/DailyJournalSection';
 import { AiQuestionPanel } from '../components/ai/AiQuestionPanel';
 import { createAiPageContext } from '../components/ai/createAiPageContext';
 import type { AiContextModule } from '@littlefootprints/shared';
 
-type Section = 'timeline' | 'interests' | 'profile';
+type Section = 'timeline' | 'interests' | 'journal' | 'profile';
 
 const SECTIONS: { key: Section; label: string }[] = [
   { key: 'timeline', label: '时间线' },
   { key: 'interests', label: '兴趣' },
+  { key: 'journal', label: '日志' },
   { key: 'profile', label: '档案' },
 ];
 
@@ -84,6 +86,7 @@ export function GrowthPage() {
 
       {section === 'timeline' && <GrowthTimeline children={children ?? []} childId={childId} />}
       {section === 'interests' && <GrowthInterests childId={childId} />}
+      {section === 'journal' && <DailyJournalSection childId={childId} />}
       {section === 'profile' && <GrowthProfile childId={childId} />}
 
       {isParent && (

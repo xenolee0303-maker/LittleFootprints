@@ -6,6 +6,7 @@ import { childProfileTable } from '../db/schema/child-profile.js';
 import { interestTable } from '../db/schema/interest.js';
 import { interestNoteTable } from '../db/schema/interest-note.js';
 import { growthEventTable } from '../db/schema/growth-event.js';
+import { dailyJournalTable } from '../db/schema/daily-journal.js';
 import { getComparisonWeeks, addDays } from './week-utils.js';
 import { getWeekStartDate } from '@littlefootprints/shared';
 
@@ -38,15 +39,17 @@ export async function buildAnalysisSnapshot(
 
   const rangeFrom = range?.dateFrom ?? weeks.current.weekStart;
   const rangeTo = range?.dateTo ?? weeks.current.weekEnd;
-  const [profile, interests, allNotes, allEvents] = await Promise.all([
+  const [profile, interests, allNotes, allEvents, allJournal] = await Promise.all([
     db.select().from(childProfileTable).where(eq(childProfileTable.childId, childId)).get(),
     db.select().from(interestTable).where(eq(interestTable.childId, childId)).all(),
     db.select().from(interestNoteTable).all(),
     db.select().from(growthEventTable).all(),
+    db.select().from(dailyJournalTable).where(eq(dailyJournalTable.childId, childId)).all(),
   ]);
 
   const interestById = new Map(interests.map((i) => [i.id, i]));
   const notesInRange = allNotes.filter((n) => interestById.has(n.interestId) && n.date >= rangeFrom && n.date <= rangeTo);
+  const journalInRange = allJournal.filter((entry) => entry.date >= rangeFrom && entry.date <= rangeTo);
   const eventsInRange = allEvents
     .filter((e) => (JSON.parse(e.participantChildIds) as string[]).includes(childId))
     .filter((e) => e.startDate >= rangeFrom && e.startDate <= rangeTo);
@@ -75,8 +78,11 @@ export async function buildAnalysisSnapshot(
   for (const event of eventsInRange) {
     evidenceRows.push(evidence('growth_event', event.id, `成长事件:${event.title}`, truncate(`${event.type} ${event.startDate}${event.endDate ? `~${event.endDate}` : ''}${event.location ? ` ${event.location}` : ''} ${event.description ?? ''}`, 120)));
   }
+  for (const entry of journalInRange) {
+    evidenceRows.push(evidence('journal', entry.id, `日志 ${entry.date}`, truncate(`${entry.date}${entry.mood ? ` ${entry.mood}` : ''}${entry.authorRole === 'child' ? '(孩子记录)' : ''}: ${entry.content}`, 120)));
+  }
 
-  const recordCount = notesInRange.length + eventsInRange.length;
+  const recordCount = notesInRange.length + eventsInRange.length + journalInRange.length;
   const completeness = Math.min(1, recordCount / 6);
 
   return {
@@ -92,6 +98,7 @@ export async function buildAnalysisSnapshot(
       activeInterestCount,
       interestNoteCount: notesInRange.length,
       growthEventCount: eventsInRange.length,
+      journalEntryCount: journalInRange.length,
       totalInterestCount: interests.length,
     },
     growth: {

@@ -24,7 +24,7 @@ export interface AnalysisEvidence {
   id: string;
   label: string;
   value: string | number;
-  sourceType: 'interest_note' | 'growth_event' | 'aggregate';
+  sourceType: 'interest_note' | 'growth_event' | 'journal' | 'aggregate';
   sourceId?: string;
 }
 

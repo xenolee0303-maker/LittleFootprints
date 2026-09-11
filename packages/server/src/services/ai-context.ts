@@ -55,7 +55,9 @@ export async function createAnalysisContext(input: CreateAnalysisContextInput): 
     ? snapshot.evidence
     : input.module === 'profile'
       ? []
-      : evidenceByModule[input.module];
+      : input.module === 'growth-timeline'
+        ? snapshot.evidence.filter((e) => e.sourceType === 'growth_event' || e.sourceType === 'journal')
+        : evidenceByModule[input.module];
 
   const scoped = {
     ...snapshot,
