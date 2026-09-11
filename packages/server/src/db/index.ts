@@ -39,9 +39,9 @@ const schema = {
 
 export const db = drizzle(sqlite, { schema });
 
-// Auto-migrate on startup (test uses in-memory, production uses file)
-if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'production') {
-  // Migrations are at dist/db/migrations (copied by build script)
+// Auto-migrate on every startup (idempotent: applied migrations are recorded
+// in the database; dev uses src/db/migrations, build copies them to dist/db)
+{
   const migrationsFolder = resolve(dirname(fileURLToPath(import.meta.url)), 'migrations');
   migrate(db, { migrationsFolder });
 }
