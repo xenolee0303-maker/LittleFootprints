@@ -2,6 +2,7 @@ import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
 import { interestNoteTable } from './interest-note.js';
 import { growthEventTable } from './growth-event.js';
 import { dailyJournalTable } from './daily-journal.js';
+import { healthRecordTable } from './health.js';
 
 // Uploaded works/process files (images and videos) attached to interest notes,
 // growth events or journal entries. Exactly one owner id is set.
@@ -11,6 +12,7 @@ export const mediaAssetTable = sqliteTable('media_asset', {
   noteId: text('note_id').references(() => interestNoteTable.id, { onDelete: 'cascade' }),
   eventId: text('event_id').references(() => growthEventTable.id, { onDelete: 'cascade' }),
   journalId: text('journal_id').references(() => dailyJournalTable.id, { onDelete: 'cascade' }),
+  healthRecordId: text('health_record_id').references(() => healthRecordTable.id, { onDelete: 'cascade' }),
   kind: text('kind').notNull(),
   fileName: text('file_name').notNull(),
   storagePath: text('storage_path').notNull(),

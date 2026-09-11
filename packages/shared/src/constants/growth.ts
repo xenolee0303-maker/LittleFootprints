@@ -45,3 +45,10 @@ export const JOURNAL_MOOD_LABELS: Record<string, string> = {
   tired: '有点累 😪',
   sad: '不太开心 😢',
 };
+
+export const HEALTH_RECORD_TYPE_LABELS: Record<string, string> = {
+  checkup: '体检复查',
+  illness: '生病就诊',
+  vaccination: '疫苗接种',
+  other: '其他',
+};

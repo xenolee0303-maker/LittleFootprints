@@ -12,6 +12,8 @@ export const MAX_ASSETS_PER_NOTE = 9;
 
 const IMAGE_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif', '.avif', '.bmp', '.tiff', '.heic', '.heif']);
 const VIDEO_EXTENSIONS = new Set(['.mp4', '.mov', '.webm', '.m4v', '.3gp']);
+// Report documents (e.g. lab result PDFs) are stored and served but never thumbnailed.
+const DOCUMENT_EXTENSIONS = new Set(['.pdf']);
 const PLACEHOLDER_EXTENSIONS = new Set(['.heic', '.heif']);
 
 export function getUploadsRoot(): string {
@@ -34,7 +36,11 @@ export function assetKindFor(fileName: string): MediaKind | null {
   return null;
 }
 
-type MediaAssetRow = { id: string; noteId: string | null; eventId: string | null; journalId: string | null; kind: string; fileName: string; storagePath: string; sizeBytes: number; createdAt: string };
+export function isDocumentFile(fileName: string): boolean {
+  return DOCUMENT_EXTENSIONS.has(path.extname(fileName).toLowerCase());
+}
+
+type MediaAssetRow = { id: string; noteId: string | null; eventId: string | null; journalId: string | null; healthRecordId: string | null; kind: string; fileName: string; storagePath: string; sizeBytes: number; createdAt: string };
 
 function toInfo(row: { id: string; kind: string; fileName: string; sizeBytes: number; storagePath: string }): MediaAssetInfo {
   const ext = path.extname(row.fileName).toLowerCase();
@@ -43,18 +49,18 @@ function toInfo(row: { id: string; kind: string; fileName: string; sizeBytes: nu
     kind: row.kind as MediaKind,
     fileName: row.fileName,
     sizeBytes: row.sizeBytes,
-    thumbnailUnavailable: PLACEHOLDER_EXTENSIONS.has(ext) || row.kind === 'video',
+    thumbnailUnavailable: PLACEHOLDER_EXTENSIONS.has(ext) || isDocumentFile(row.fileName) || row.kind === 'video',
   };
 }
 
-export type AssetOwner = { noteId: string } | { eventId: string } | { journalId: string };
+export type AssetOwner = { noteId: string } | { eventId: string } | { journalId: string } | { healthRecordId: string };
 
 export async function attachAsset(owner: AssetOwner, fileName: string, data: Buffer): Promise<MediaAssetInfo> {
-  const kind = assetKindFor(fileName);
-  if (!kind) throw new AssetError(`不支持的文件类型：${path.extname(fileName) || '(无扩展名)'}。支持常见图片和 mp4/mov 等视频`, 400);
+  const kind = assetKindFor(fileName) ?? (isDocumentFile(fileName) ? 'image' : null);
+  if (!kind) throw new AssetError(`不支持的文件类型：${path.extname(fileName) || '(无扩展名)'}。支持常见图片、mp4/mov 视频和 PDF`, 400);
 
-  const ownerColumn = 'noteId' in owner ? mediaAssetTable.noteId : 'eventId' in owner ? mediaAssetTable.eventId : mediaAssetTable.journalId;
-  const ownerId = 'noteId' in owner ? owner.noteId : 'eventId' in owner ? owner.eventId : owner.journalId;
+  const ownerColumn = 'noteId' in owner ? mediaAssetTable.noteId : 'eventId' in owner ? mediaAssetTable.eventId : 'journalId' in owner ? mediaAssetTable.journalId : mediaAssetTable.healthRecordId;
+  const ownerId = 'noteId' in owner ? owner.noteId : 'eventId' in owner ? owner.eventId : 'journalId' in owner ? owner.journalId : owner.healthRecordId;
   const existing = await db.select({ id: mediaAssetTable.id }).from(mediaAssetTable).where(eq(ownerColumn, ownerId)).all();
   if (existing.length >= MAX_ASSETS_PER_NOTE) {
     throw new AssetError(`最多 ${MAX_ASSETS_PER_NOTE} 个附件`, 400);
@@ -69,7 +75,7 @@ export async function attachAsset(owner: AssetOwner, fileName: string, data: Buf
   await writeFile(absolute, data);
 
   const now = new Date().toISOString();
-  const row = { id, noteId: 'noteId' in owner ? owner.noteId : null, eventId: 'eventId' in owner ? owner.eventId : null, journalId: 'journalId' in owner ? owner.journalId : null, kind, fileName: safeName, storagePath, sizeBytes: data.byteLength, createdAt: now };
+  const row = { id, noteId: 'noteId' in owner ? owner.noteId : null, eventId: 'eventId' in owner ? owner.eventId : null, journalId: 'journalId' in owner ? owner.journalId : null, healthRecordId: 'healthRecordId' in owner ? owner.healthRecordId : null, kind, fileName: safeName, storagePath, sizeBytes: data.byteLength, createdAt: now };
   await db.insert(mediaAssetTable).values(row).run();
   return toInfo(row);
 }
@@ -86,12 +92,16 @@ export async function listAssetsByJournals(journalIds: string[]): Promise<Map<st
   return collectAssets(mediaAssetTable.journalId, journalIds);
 }
 
-async function collectAssets(column: typeof mediaAssetTable.noteId | typeof mediaAssetTable.eventId | typeof mediaAssetTable.journalId, ids: string[]): Promise<Map<string, MediaAssetInfo[]>> {
+export async function listAssetsByHealthRecords(ids: string[]): Promise<Map<string, MediaAssetInfo[]>> {
+  return collectAssets(mediaAssetTable.healthRecordId, ids);
+}
+
+async function collectAssets(column: typeof mediaAssetTable.noteId | typeof mediaAssetTable.eventId | typeof mediaAssetTable.journalId | typeof mediaAssetTable.healthRecordId, ids: string[]): Promise<Map<string, MediaAssetInfo[]>> {
   const result = new Map<string, MediaAssetInfo[]>();
   if (ids.length === 0) return result;
   const rows: MediaAssetRow[] = await db.select().from(mediaAssetTable).where(inArray(column, ids)).all();
   for (const row of rows.sort((a, b) => (a.createdAt < b.createdAt ? -1 : 1))) {
-    const ownerId = row.noteId ?? row.eventId ?? row.journalId;
+    const ownerId = row.noteId ?? row.eventId ?? row.journalId ?? row.healthRecordId;
     if (!ownerId) continue;
     const list = result.get(ownerId) ?? [];
     list.push(toInfo(row));
@@ -124,7 +134,7 @@ const CONTENT_TYPES: Record<string, string> = {
   '.gif': 'image/gif', '.avif': 'image/avif', '.bmp': 'image/bmp', '.tiff': 'image/tiff',
   '.heic': 'image/heic', '.heif': 'image/heif',
   '.mp4': 'video/mp4', '.m4v': 'video/mp4', '.mov': 'video/quicktime',
-  '.webm': 'video/webm', '.3gp': 'video/3gpp',
+  '.webm': 'video/webm', '.3gp': 'video/3gpp', '.pdf': 'application/pdf',
 };
 
 function contentTypeFor(fileName: string): string {

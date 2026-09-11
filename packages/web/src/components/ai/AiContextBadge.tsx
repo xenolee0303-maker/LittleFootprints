@@ -1,7 +1,7 @@
 import type { AiContextModule, AiContextPage, AnalysisContextSnapshot } from '@littlefootprints/shared';
 
 const pageLabels: Record<AiContextPage, string> = { growth: '成长' };
-const moduleLabels: Record<AiContextModule, string> = { page: '整页', interests: '兴趣', 'growth-timeline': '成长时间线', profile: '成长档案' };
+const moduleLabels: Record<AiContextModule, string> = { page: '整页', interests: '兴趣', 'growth-timeline': '成长时间线', profile: '成长档案', health: '健康' };
 
 export function AiContextBadge({ context, className = '' }: { context: Pick<AnalysisContextSnapshot, 'page' | 'module' | 'childLabel' | 'dateFrom' | 'dateTo' | 'filters'>; className?: string }) {
   const range = context.dateFrom && context.dateTo ? `${context.dateFrom} 至 ${context.dateTo}` : context.dateFrom ?? context.dateTo;

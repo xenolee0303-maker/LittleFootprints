@@ -3,7 +3,7 @@ import { buildAnalysisSnapshot } from './ai-analysis-snapshot.js';
 import { todayLocalDate, getWeekStartDate } from '@littlefootprints/shared';
 
 export const AI_CONTEXT_REGISTRY: Readonly<Record<AiContextPage, readonly AiContextModule[]>> = Object.freeze({
-  growth: ['page', 'interests', 'growth-timeline', 'profile'],
+  growth: ['page', 'interests', 'growth-timeline', 'profile', 'health'],
 });
 
 export interface CreateAnalysisContextInput {
@@ -16,7 +16,7 @@ export interface CreateAnalysisContextInput {
 }
 
 const pages = new Set<AiContextPage>(['growth']);
-const modules = new Set<AiContextModule>(['page', 'interests', 'growth-timeline', 'profile']);
+const modules = new Set<AiContextModule>(['page', 'interests', 'growth-timeline', 'profile', 'health']);
 
 function validDate(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
@@ -49,7 +49,8 @@ export async function createAnalysisContext(input: CreateAnalysisContextInput): 
   // page → both; profile → background context only (no evidence rows).
   const evidenceByModule = {
     interests: snapshot.evidence.filter((e) => e.sourceType === 'interest_note'),
-    'growth-timeline': snapshot.evidence.filter((e) => e.sourceType === 'growth_event'),
+    'growth-timeline': snapshot.evidence.filter((e) => e.sourceType === 'growth_event' || e.sourceType === 'journal'),
+    health: snapshot.evidence.filter((e) => e.sourceType === 'health_record'),
   };
   const scopedEvidence = input.module === 'page'
     ? snapshot.evidence
@@ -63,7 +64,9 @@ export async function createAnalysisContext(input: CreateAnalysisContextInput): 
     ...snapshot,
     metrics: input.module === 'profile'
       ? { activeInterestCount: snapshot.metrics.activeInterestCount, totalInterestCount: snapshot.metrics.totalInterestCount }
-      : snapshot.metrics,
+      : input.module === 'health'
+        ? { healthRecordCount: snapshot.metrics.healthRecordCount }
+        : snapshot.metrics,
     evidence: scopedEvidence,
   };
 

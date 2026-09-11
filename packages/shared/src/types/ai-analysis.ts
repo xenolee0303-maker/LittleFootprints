@@ -16,7 +16,7 @@ export type AiReportFailureCode =
   | 'generation_failed';
 export type AiConfidence = 'low' | 'medium' | 'high';
 export type AiContextPage = 'growth';
-export type AiContextModule = 'page' | 'interests' | 'growth-timeline' | 'profile';
+export type AiContextModule = 'page' | 'interests' | 'growth-timeline' | 'profile' | 'health';
 export type JsonPrimitive = string | number | boolean | null;
 export type JsonValue = JsonPrimitive | JsonValue[] | { [key: string]: JsonValue };
 
@@ -24,7 +24,7 @@ export interface AnalysisEvidence {
   id: string;
   label: string;
   value: string | number;
-  sourceType: 'interest_note' | 'growth_event' | 'journal' | 'aggregate';
+  sourceType: 'interest_note' | 'growth_event' | 'journal' | 'health_record' | 'aggregate';
   sourceId?: string;
 }
 
@@ -45,12 +45,14 @@ export interface GrowthSnapshotContext {
   }>;
 }
 
+export interface HealthSnapshotContext { allergies: string | null; chronicConditions: string | null; notes: string | null; }
 export interface AnalysisSnapshot {
   childId: string;
   childLabel: string;
   range: { currentStart: string; currentEnd: string; previousStart: string; previousEnd: string };
   metrics: Record<string, number | string | null>;
   growth?: GrowthSnapshotContext;
+  health?: HealthSnapshotContext;
   evidence: AnalysisEvidence[];
   dataCompleteness: number;
   confidence: AiConfidence;

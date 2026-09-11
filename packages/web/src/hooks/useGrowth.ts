@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../api/client';
 import type {
+  HealthProfile,
+  HealthRecord,
   DailyJournal,
   ChildWeeklySummary,
   ChildProfile,
@@ -292,5 +294,79 @@ export function useUploadJournalAsset() {
       return response.json();
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['journal'] }),
+  });
+}
+
+// ── Health ───────────────────────────────────────────────
+
+export function useHealthProfile(childId: string | undefined) {
+  return useQuery({
+    queryKey: ['health-profile', childId],
+    queryFn: () => api.get<HealthProfile>(`/children/${childId}/health/profile`),
+    enabled: !!childId,
+  });
+}
+
+export function useSaveHealthProfile(childId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: Partial<{ allergies: string | null; chronicConditions: string | null; notes: string | null }>) =>
+      api.put<HealthProfile>(`/children/${childId}/health/profile`, input),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['health-profile', childId] }),
+  });
+}
+
+export function useHealthRecords(childId: string | undefined) {
+  return useQuery({
+    queryKey: ['health-records', childId],
+    queryFn: () => api.get<HealthRecord[]>(`/children/${childId}/health/records`),
+    enabled: !!childId,
+  });
+}
+
+export function useCreateHealthRecord(childId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { date: string; type: string; title: string; facility?: string | null; summary?: string | null; followUpDate?: string | null }) =>
+      api.post<HealthRecord>(`/children/${childId}/health/records`, input),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['health-records', childId] }),
+  });
+}
+
+export function useUpdateHealthRecord() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...input }: { id: string } & Partial<{ date: string; type: string; title: string; facility?: string | null; summary?: string | null; followUpDate?: string | null }>) =>
+      api.patch<HealthRecord>(`/health-records/${id}`, input),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['health-records'] }),
+  });
+}
+
+export function useDeleteHealthRecord() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.delete<{ success: boolean }>(`/health-records/${id}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['health-records'] }),
+  });
+}
+
+export function useUploadHealthAsset() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ recordId, file }: { recordId: string; file: File }) => {
+      const body = new FormData();
+      body.append('file', file);
+      const response = await fetch(`/api/health-records/${encodeURIComponent(recordId)}/assets`, {
+        method: 'POST',
+        body,
+        credentials: 'include',
+      });
+      if (!response.ok) {
+        const detail = await response.json().catch(() => null);
+        throw new Error(detail?.message ?? '上传失败');
+      }
+      return response.json();
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['health-records'] }),
   });
 }

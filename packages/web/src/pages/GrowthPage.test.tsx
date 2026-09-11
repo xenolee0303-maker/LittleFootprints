@@ -4,13 +4,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Child } from '@littlefootprints/shared';
 import { GrowthPage } from './GrowthPage';
 
-const { mockedUseChildren, mockedUsePerspective, mockedUseGrowthEvents, mockedUseChildSummaries, mockedUseInterests, mockedUseJournal } = vi.hoisted(() => ({
+const { mockedUseChildren, mockedUsePerspective, mockedUseGrowthEvents, mockedUseChildSummaries, mockedUseInterests, mockedUseJournal, mockedUseHealthRecords } = vi.hoisted(() => ({
   mockedUseChildren: vi.fn(),
   mockedUsePerspective: vi.fn(),
   mockedUseGrowthEvents: vi.fn(),
   mockedUseChildSummaries: vi.fn(),
   mockedUseInterests: vi.fn(),
   mockedUseJournal: vi.fn(),
+  mockedUseHealthRecords: vi.fn(),
 }));
 
 vi.mock('../hooks/useChildren', () => ({
@@ -29,6 +30,12 @@ vi.mock('../hooks/useGrowth', async (importOriginal) => {
     useChildSummaries: mockedUseChildSummaries,
     useInterests: mockedUseInterests,
     useJournal: mockedUseJournal,
+    useHealthProfile: () => ({ data: { childId: 'child-1', allergies: '尘螨', chronicConditions: '哮喘', notes: null, createdAt: '', updatedAt: '' } }),
+    useHealthRecords: mockedUseHealthRecords,
+    useCreateHealthRecord: () => ({ mutateAsync: vi.fn(), isPending: false, isError: false }),
+    useUpdateHealthRecord: () => ({ mutateAsync: vi.fn(), isPending: false, isError: false }),
+    useDeleteHealthRecord: () => ({ mutate: vi.fn(), isPending: false, isError: false }),
+    useUploadHealthAsset: () => ({ mutateAsync: vi.fn(), isPending: false, isError: false }),
     useCreateJournal: () => ({ mutateAsync: vi.fn(), isPending: false, isError: false }),
     useUpdateJournal: () => ({ mutateAsync: vi.fn(), isPending: false, isError: false }),
     useDeleteJournal: () => ({ mutate: vi.fn(), isPending: false, isError: false }),
@@ -84,6 +91,7 @@ describe('GrowthPage', () => {
     mockedUseChildSummaries.mockReturnValue({ data: { summaries: [] } });
     mockedUseInterests.mockReturnValue({ data: [], isLoading: false });
     mockedUseJournal.mockReturnValue({ data: [], isLoading: false });
+    mockedUseHealthRecords.mockReturnValue({ data: [], isLoading: false });
   });
 
   it('renders timeline section with add button in parent perspective', async () => {
@@ -217,6 +225,26 @@ describe('GrowthPage', () => {
     await user.click(screen.getByRole('button', { name: '日志' }));
     expect(await screen.findByText('我学会跳绳了！')).toBeInTheDocument();
     expect(screen.getByText('特别开心 😄')).toBeInTheDocument();
+  });
+
+  it('shows the health section with profile card and records', async () => {
+    mockedUseHealthRecords.mockReturnValue({
+      data: [
+        {
+          id: 'hr1', childId: child.id, date: '2026-09-10', type: 'illness', title: '哮喘复诊',
+          facility: '市儿童医院', summary: '调整吸入剂剂量。', followUpDate: '2026-09-24',
+          assets: [], createdAt: '', updatedAt: '',
+        },
+      ],
+      isLoading: false,
+    });
+    const { userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    renderPage();
+    await user.click(screen.getByRole('button', { name: '健康' }));
+    expect(await screen.findByText('哮喘复诊')).toBeInTheDocument();
+    expect(screen.getByText('哮喘')).toBeInTheDocument(); // profile card
+    expect(screen.getByText(/复查 2026-09-24/)).toBeInTheDocument();
   });
 
   it('switches to interests and profile sections', async () => {

@@ -47,6 +47,14 @@ export function AssetViewer({ assets, index, onClose, onNavigate }: {
         )}
         {asset.kind === 'video' ? (
           <video key={asset.id} src={assetUrl(asset.id)} controls autoPlay playsInline className="max-h-full max-w-full" />
+        ) : asset.fileName.toLowerCase().endsWith('.pdf') ? (
+          <div className="text-center text-white/70">
+            <span className="block text-5xl">📄</span>
+            <p className="mt-3 text-sm">{asset.fileName}</p>
+            <a href={assetUrl(asset.id)} target="_blank" rel="noreferrer" className="mt-3 inline-block rounded-lg bg-white/10 px-4 py-2 text-sm text-white hover:bg-white/20">
+              新窗口打开 PDF
+            </a>
+          </div>
         ) : (
           <img key={asset.id} src={assetUrl(asset.id)} alt={asset.fileName} className="max-h-full max-w-full object-contain" />
         )}
@@ -67,7 +75,7 @@ export function AssetThumb({ asset, onClick }: { asset: MediaAssetInfo; onClick?
     >
       {asset.thumbnailUnavailable ? (
         <div className="flex h-full w-full items-center justify-center text-2xl">
-          {asset.kind === 'video' ? '🎬' : '🖼️'}
+          {asset.fileName.toLowerCase().endsWith('.pdf') ? '📄' : asset.kind === 'video' ? '🎬' : '🖼️'}
         </div>
       ) : (
         <img src={assetThumbUrl(asset.id)} alt={asset.fileName} loading="lazy" className="h-full w-full object-cover" />

@@ -7,6 +7,7 @@ import { interestTable } from '../db/schema/interest.js';
 import { interestNoteTable } from '../db/schema/interest-note.js';
 import { growthEventTable } from '../db/schema/growth-event.js';
 import { dailyJournalTable } from '../db/schema/daily-journal.js';
+import { healthProfileTable, healthRecordTable } from '../db/schema/health.js';
 import { getComparisonWeeks, addDays } from './week-utils.js';
 import { getWeekStartDate } from '@littlefootprints/shared';
 
@@ -39,17 +40,20 @@ export async function buildAnalysisSnapshot(
 
   const rangeFrom = range?.dateFrom ?? weeks.current.weekStart;
   const rangeTo = range?.dateTo ?? weeks.current.weekEnd;
-  const [profile, interests, allNotes, allEvents, allJournal] = await Promise.all([
+  const [profile, interests, allNotes, allEvents, allJournal, healthProfile, allHealthRecords] = await Promise.all([
     db.select().from(childProfileTable).where(eq(childProfileTable.childId, childId)).get(),
     db.select().from(interestTable).where(eq(interestTable.childId, childId)).all(),
     db.select().from(interestNoteTable).all(),
     db.select().from(growthEventTable).all(),
     db.select().from(dailyJournalTable).where(eq(dailyJournalTable.childId, childId)).all(),
+    db.select().from(healthProfileTable).where(eq(healthProfileTable.childId, childId)).get(),
+    db.select().from(healthRecordTable).where(eq(healthRecordTable.childId, childId)).all(),
   ]);
 
   const interestById = new Map(interests.map((i) => [i.id, i]));
   const notesInRange = allNotes.filter((n) => interestById.has(n.interestId) && n.date >= rangeFrom && n.date <= rangeTo);
   const journalInRange = allJournal.filter((entry) => entry.date >= rangeFrom && entry.date <= rangeTo);
+  const healthInRange = allHealthRecords.filter((r) => (r.date >= rangeFrom && r.date <= rangeTo) || (r.followUpDate !== null && r.followUpDate >= rangeFrom && r.followUpDate <= rangeTo));
   const eventsInRange = allEvents
     .filter((e) => (JSON.parse(e.participantChildIds) as string[]).includes(childId))
     .filter((e) => e.startDate >= rangeFrom && e.startDate <= rangeTo);
@@ -81,8 +85,11 @@ export async function buildAnalysisSnapshot(
   for (const entry of journalInRange) {
     evidenceRows.push(evidence('journal', entry.id, `日志 ${entry.date}`, truncate(`${entry.date}${entry.mood ? ` ${entry.mood}` : ''}${entry.authorRole === 'child' ? '(孩子记录)' : ''}: ${entry.content}`, 120)));
   }
+  for (const record of healthInRange) {
+    evidenceRows.push(evidence('health_record', record.id, `就诊:${record.title}`, truncate(`${record.date} ${record.type}${record.facility ? ` ${record.facility}` : ''} ${record.summary ?? ''}`, 120)));
+  }
 
-  const recordCount = notesInRange.length + eventsInRange.length + journalInRange.length;
+  const recordCount = notesInRange.length + eventsInRange.length + journalInRange.length + healthInRange.length;
   const completeness = Math.min(1, recordCount / 6);
 
   return {
@@ -99,7 +106,13 @@ export async function buildAnalysisSnapshot(
       interestNoteCount: notesInRange.length,
       growthEventCount: eventsInRange.length,
       journalEntryCount: journalInRange.length,
+      healthRecordCount: healthInRange.length,
       totalInterestCount: interests.length,
+    },
+    health: {
+      allergies: healthProfile?.allergies ?? null,
+      chronicConditions: healthProfile?.chronicConditions ?? null,
+      notes: healthProfile?.notes ?? null,
     },
     growth: {
       background: profile?.aiBackground ?? null,

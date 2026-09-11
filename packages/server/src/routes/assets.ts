@@ -2,6 +2,7 @@ import type { FastifyInstance, FastifyReply } from 'fastify';
 import { getNote } from '../services/interests.js';
 import { getEvent } from '../services/growth-events.js';
 import { getJournalEntry } from '../services/journal.js';
+import { getHealthRecord } from '../services/health.js';
 import type { AssetOwner } from '../services/media-assets.js';
 import {
   attachAsset,
@@ -75,6 +76,14 @@ export async function assetRoutes(app: FastifyInstance) {
     param: 'id',
     owner: async (id) => (await getJournalEntry(id)) ? { journalId: id } : null,
     notFoundMessage: '日志不存在',
+  });
+
+  // POST /api/health-records/:id/assets — multipart upload (single file; reports/photos)
+  registerAssetUpload(app, {
+    path: '/api/health-records/:id/assets',
+    param: 'id',
+    owner: async (id) => (await getHealthRecord(id)) ? { healthRecordId: id } : null,
+    notFoundMessage: '就诊记录不存在',
   });
 
   // GET /api/assets/:id — stream original (Range supported for video)

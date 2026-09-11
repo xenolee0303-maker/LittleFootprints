@@ -6,16 +6,18 @@ import { GrowthInterests } from '../components/growth/GrowthInterests';
 import { GrowthProfile } from '../components/growth/GrowthProfile';
 import { ChildWeeklySummaryCard } from '../components/growth/ChildWeeklySummary';
 import { DailyJournalSection } from '../components/growth/DailyJournalSection';
+import { HealthSection } from '../components/growth/HealthSection';
 import { AiQuestionPanel } from '../components/ai/AiQuestionPanel';
 import { createAiPageContext } from '../components/ai/createAiPageContext';
 import type { AiContextModule } from '@littlefootprints/shared';
 
-type Section = 'timeline' | 'interests' | 'journal' | 'profile';
+type Section = 'timeline' | 'interests' | 'journal' | 'health' | 'profile';
 
 const SECTIONS: { key: Section; label: string }[] = [
   { key: 'timeline', label: '时间线' },
   { key: 'interests', label: '兴趣' },
   { key: 'journal', label: '日志' },
+  { key: 'health', label: '健康' },
   { key: 'profile', label: '档案' },
 ];
 
@@ -87,6 +89,7 @@ export function GrowthPage() {
       {section === 'timeline' && <GrowthTimeline children={children ?? []} childId={childId} />}
       {section === 'interests' && <GrowthInterests childId={childId} />}
       {section === 'journal' && <DailyJournalSection childId={childId} />}
+      {section === 'health' && <HealthSection childId={childId} />}
       {section === 'profile' && <GrowthProfile childId={childId} />}
 
       {isParent && (
@@ -94,7 +97,7 @@ export function GrowthPage() {
           compact
           context={createAiPageContext({
             page: 'growth',
-            module: (section === 'timeline' ? 'growth-timeline' : section) as AiContextModule,
+            module: (section === 'timeline' ? 'growth-timeline' : section === 'journal' ? 'growth-timeline' : section) as AiContextModule,
             childId,
             childLabel: currentChild.name,
           })}

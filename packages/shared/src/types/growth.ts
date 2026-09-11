@@ -201,3 +201,43 @@ export type CreateDailyJournalInput = {
 };
 
 export type UpdateDailyJournalInput = Partial<CreateDailyJournalInput>;
+
+// ── Health ───────────────────────────────────────────────
+
+export interface HealthProfile {
+  childId: string;
+  allergies: string | null;        // 过敏源
+  chronicConditions: string | null; // 基础疾病（哮喘等）
+  notes: string | null;            // 其他身体情况备注
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type UpsertHealthProfileInput = Partial<Pick<HealthProfile, 'allergies' | 'chronicConditions' | 'notes'>>;
+
+export type HealthRecordType = 'checkup' | 'illness' | 'vaccination' | 'other';
+
+export interface HealthRecord {
+  id: string;
+  childId: string;
+  date: string; // YYYY-MM-DD
+  type: HealthRecordType;
+  title: string;
+  facility: string | null;
+  summary: string | null;   // 过程、诊断、医嘱、用药
+  followUpDate: string | null;
+  assets?: MediaAssetInfo[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type CreateHealthRecordInput = {
+  date: string;
+  type: HealthRecordType;
+  title: string;
+  facility?: string | null;
+  summary?: string | null;
+  followUpDate?: string | null;
+};
+
+export type UpdateHealthRecordInput = Partial<CreateHealthRecordInput>;
