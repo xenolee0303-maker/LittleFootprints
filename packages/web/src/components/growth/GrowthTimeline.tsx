@@ -292,6 +292,9 @@ export function GrowthTimeline({ children, childId }: { children: Child[]; child
           </div>
           <div className="space-y-2">
             <span className="block text-sm font-medium text-gray-700">现场照片/视频（可选）</span>
+            {editing && (editing.assets?.length ?? 0) === 0 && (
+              <p className="rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-400">这条事件还没有已上传的附件</p>
+            )}
             <input
               type="file"
               accept="image/*,video/*"
@@ -314,11 +317,14 @@ export function GrowthTimeline({ children, childId }: { children: Child[]; child
                 ))}
               </div>
             )}
-            {editing?.assets && editing.assets.length > 0 && (
-              <div className="grid w-48 grid-cols-4 gap-1">
-                {editing.assets.map((asset, ai) => (
-                  <AssetThumb key={asset.id} asset={asset} onClick={() => setViewingAssets({ assets: editing.assets!, index: ai })} />
-                ))}
+            {editing && (editing.assets?.length ?? 0) > 0 && (
+              <div className="space-y-1">
+                <p className="text-xs text-emerald-600">已上传 {editing.assets!.length} 个附件（点击可查看）</p>
+                <div className="grid w-48 grid-cols-4 gap-1">
+                  {(editing.assets ?? []).map((asset, ai) => (
+                    <AssetThumb key={asset.id} asset={asset} onClick={() => setViewingAssets({ assets: editing.assets ?? [], index: ai })} />
+                  ))}
+                </div>
               </div>
             )}
           </div>
