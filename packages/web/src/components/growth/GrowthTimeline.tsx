@@ -53,6 +53,7 @@ export function GrowthTimeline({ children, childId }: { children: Child[]; child
   const [editing, setEditing] = useState<GrowthEvent | null>(null);
   const [creating, setCreating] = useState(false);
   const [galleryEvent, setGalleryEvent] = useState<GrowthEvent | null>(null);
+  const [sectionNotice, setSectionNotice] = useState<string | null>(null);
   const uploadAsset = useUploadEventAsset();
   const deleteAsset = useDeleteAsset();
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
@@ -118,11 +119,19 @@ export function GrowthTimeline({ children, childId }: { children: Child[]; child
       const saved = editing
         ? await updateEvent.mutateAsync({ id: editing.id, ...payload })
         : await createEvent.mutateAsync(payload);
+      let uploadFailed = 0;
       for (const file of pendingFiles) {
-        await uploadAsset.mutateAsync({ eventId: saved.id, file });
+        try {
+          await uploadAsset.mutateAsync({ eventId: saved.id, file });
+        } catch {
+          uploadFailed += 1;
+        }
       }
       closeForm();
       setPendingFiles([]);
+      if (uploadFailed > 0) {
+        setSectionNotice(`事件已保存，但 ${uploadFailed} 个附件上传失败——打开该事件的「修改」可重新上传`);
+      }
     } catch (error) {
       setUploadError(error instanceof Error ? error.message : '保存或上传失败，请重试');
     }
@@ -136,6 +145,9 @@ export function GrowthTimeline({ children, childId }: { children: Child[]; child
 
   return (
     <div className="space-y-4">
+      {sectionNotice && (
+        <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700">{sectionNotice}</p>
+      )}
       <div className="flex items-center justify-between">
         <h2 className="text-base font-semibold text-gray-900">成长时间线</h2>
         {isParent && (

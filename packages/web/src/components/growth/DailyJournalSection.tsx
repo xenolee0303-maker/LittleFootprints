@@ -61,6 +61,7 @@ export function DailyJournalSection({ childId }: { childId: string }) {
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [viewingAssets, setViewingAssets] = useState<{ assets: MediaAssetInfo[]; index: number } | null>(null);
+  const [sectionNotice, setSectionNotice] = useState<string | null>(null);
 
   const monthGroups = useMemo(() => groupByMonth(entries ?? []), [entries]);
 
@@ -86,11 +87,19 @@ export function DailyJournalSection({ childId }: { childId: string }) {
       const saved = editing
         ? await updateJournal.mutateAsync({ id: editing.id, date: form.date, content: form.content, mood: form.mood })
         : await createJournal.mutateAsync({ date: form.date, content: form.content, mood: form.mood, authorRole });
+      let uploadFailed = 0;
       for (const file of pendingFiles) {
-        await uploadAsset.mutateAsync({ entryId: saved.id, file });
+        try {
+          await uploadAsset.mutateAsync({ entryId: saved.id, file });
+        } catch {
+          uploadFailed += 1;
+        }
       }
       setFormOpen(false);
       setPendingFiles([]);
+      if (uploadFailed > 0) {
+        setSectionNotice(`日志已保存，但 ${uploadFailed} 个附件上传失败——打开该篇的「修改」可重新上传`);
+      }
     } catch (error) {
       setUploadError(error instanceof Error ? error.message : '保存或上传失败，请重试');
     }
@@ -101,6 +110,9 @@ export function DailyJournalSection({ childId }: { childId: string }) {
 
   return (
     <div className="space-y-4">
+      {sectionNotice && (
+        <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700">{sectionNotice}</p>
+      )}
       <div className="flex items-center justify-between">
         <h2 className="text-base font-semibold text-gray-900">每日日志</h2>
         <Button size="sm" onClick={openCreate}>
