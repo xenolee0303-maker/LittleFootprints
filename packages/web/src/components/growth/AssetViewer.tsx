@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import type { MediaAssetInfo } from '@littlefootprints/shared';
 
 export function assetUrl(id: string): string {
@@ -56,7 +56,7 @@ export function AssetViewer({ assets, index, onClose, onNavigate }: {
             </a>
           </div>
         ) : (
-          <img key={asset.id} src={assetUrl(asset.id)} alt={asset.fileName} className="max-h-full max-w-full object-contain" />
+          <BrokenImagePanel asset={asset} />
         )}
         {index < assets.length - 1 && (
           <button type="button" onClick={() => onNavigate(index + 1)} className="absolute right-2 z-10 rounded-full bg-white/10 px-3 py-2 text-2xl text-white/80 hover:bg-white/20" aria-label="下一个">›</button>
@@ -66,19 +66,50 @@ export function AssetViewer({ assets, index, onClose, onNavigate }: {
   );
 }
 
+function BrokenImagePanel({ asset }: { asset: MediaAssetInfo }) {
+  const [broken, setBroken] = useState(false);
+  if (!broken) {
+    return (
+      <img
+        key={asset.id}
+        src={assetUrl(asset.id)}
+        alt={asset.fileName}
+        onError={() => setBroken(true)}
+        className="max-h-full max-w-full object-contain"
+      />
+    );
+  }
+  return (
+    <div className="text-center text-white/70">
+      <span className="block text-5xl">🖼️</span>
+      <p className="mt-3 text-sm">{asset.fileName}</p>
+      <p className="mt-1 text-xs text-white/40">缩略图无法生成，可能文件已损坏</p>
+      <a href={assetUrl(asset.id)} target="_blank" rel="noreferrer" className="mt-3 inline-block rounded-lg bg-white/10 px-4 py-2 text-sm text-white hover:bg-white/20">
+        尝试新窗口打开原文件
+      </a>
+    </div>
+  );
+}
+
 export function AssetThumb({ asset, onClick }: { asset: MediaAssetInfo; onClick?: () => void }) {
+  const [failed, setFailed] = useState(false);
+  const placeholderIcon = asset.fileName.toLowerCase().endsWith('.pdf') ? '📄' : asset.kind === 'video' ? '🎬' : '🖼️';
   return (
     <div
       className="relative aspect-square w-full cursor-pointer overflow-hidden rounded-lg bg-slate-100"
       onClick={onClick}
       role={onClick ? 'button' : undefined}
     >
-      {asset.thumbnailUnavailable ? (
-        <div className="flex h-full w-full items-center justify-center text-2xl">
-          {asset.fileName.toLowerCase().endsWith('.pdf') ? '📄' : asset.kind === 'video' ? '🎬' : '🖼️'}
-        </div>
+      {asset.thumbnailUnavailable || failed ? (
+        <div className="flex h-full w-full items-center justify-center text-2xl">{placeholderIcon}</div>
       ) : (
-        <img src={assetThumbUrl(asset.id)} alt={asset.fileName} loading="lazy" className="h-full w-full object-cover" />
+        <img
+          src={assetThumbUrl(asset.id)}
+          alt={asset.fileName}
+          loading="lazy"
+          onError={() => setFailed(true)}
+          className="h-full w-full object-cover"
+        />
       )}
       {asset.kind === 'video' && (
         <span className="pointer-events-none absolute bottom-1 right-1 rounded bg-black/50 px-1 text-xs text-white">🎬</span>

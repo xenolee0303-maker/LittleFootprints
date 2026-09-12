@@ -181,14 +181,19 @@ export async function generateThumbnail(filePath: string): Promise<{ body: Buffe
     const { readFile } = await import('node:fs/promises');
     return { body: await readFile(thumbPath), cached: true };
   }
-  const buffer = await sharp(filePath, { failOn: 'none' })
-    .rotate()
-    .resize(THUMBNAIL_LONG_EDGE, THUMBNAIL_LONG_EDGE, { fit: 'inside', withoutEnlargement: true })
-    .webp({ quality: 78 })
-    .toBuffer();
-  const { writeFile } = await import('node:fs/promises');
-  await writeFile(thumbPath, buffer);
-  return { body: buffer, cached: false };
+  try {
+    const buffer = await sharp(filePath, { failOn: 'none' })
+      .rotate()
+      .resize(THUMBNAIL_LONG_EDGE, THUMBNAIL_LONG_EDGE, { fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: 78 })
+      .toBuffer();
+    const { writeFile } = await import('node:fs/promises');
+    await writeFile(thumbPath, buffer);
+    return { body: buffer, cached: false };
+  } catch {
+    // Corrupt or undecodable image: serve the placeholder instead of failing.
+    return { placeholder: true };
+  }
 }
 
 export async function directoryExistsInLibrary(directoryPath: string): Promise<boolean> {
