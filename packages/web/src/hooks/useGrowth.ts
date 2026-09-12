@@ -216,7 +216,13 @@ export function useDeleteAsset() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => api.delete<{ success: boolean }>(`/assets/${encodeURIComponent(id)}`),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['interests'] }),
+    // Assets can belong to interest notes, events, journals or health records.
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['interests'] });
+      void qc.invalidateQueries({ queryKey: ['growth-events'] });
+      void qc.invalidateQueries({ queryKey: ['journal'] });
+      void qc.invalidateQueries({ queryKey: ['health-records'] });
+    },
   });
 }
 

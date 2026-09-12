@@ -91,7 +91,7 @@ function BrokenImagePanel({ asset }: { asset: MediaAssetInfo }) {
   );
 }
 
-export function AssetThumb({ asset, onClick }: { asset: MediaAssetInfo; onClick?: () => void }) {
+export function AssetThumb({ asset, onClick, onDelete }: { asset: MediaAssetInfo; onClick?: () => void; onDelete?: () => void }) {
   const [failed, setFailed] = useState(false);
   const placeholderIcon = asset.fileName.toLowerCase().endsWith('.pdf') ? '📄' : asset.kind === 'video' ? '🎬' : '🖼️';
   return (
@@ -113,6 +113,19 @@ export function AssetThumb({ asset, onClick }: { asset: MediaAssetInfo; onClick?
       )}
       {asset.kind === 'video' && (
         <span className="pointer-events-none absolute bottom-1 right-1 rounded bg-black/50 px-1 text-xs text-white">🎬</span>
+      )}
+      {onDelete && (
+        <button
+          type="button"
+          aria-label={`删除 ${asset.fileName}`}
+          onClick={(event) => {
+            event.stopPropagation();
+            onDelete();
+          }}
+          className="absolute right-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-black/60 text-[10px] leading-none text-white hover:bg-red-500"
+        >
+          ×
+        </button>
       )}
     </div>
   );

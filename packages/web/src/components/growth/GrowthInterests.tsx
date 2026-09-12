@@ -256,20 +256,7 @@ export function GrowthInterests({ childId }: { childId: string }) {
                             )}
                           </div>
                           <div className="flex shrink-0 gap-1">
-                            {isParent && note.assets && note.assets.length > 0 && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-gray-400 hover:bg-gray-100"
-                                onClick={() => {
-                                  const last = note.assets![note.assets!.length - 1];
-                                  if (window.confirm(`删除附件「${last.fileName}」？`)) deleteAsset.mutate(last.id);
-                                }}
-                              >
-                                删附件
-                              </Button>
-                            )}
-                            <Button variant="ghost" size="sm" onClick={() => openEditNote(interest, note)}>
+<Button variant="ghost" size="sm" onClick={() => openEditNote(interest, note)}>
                               修改
                             </Button>
                             {isParent && (
@@ -460,7 +447,23 @@ export function GrowthInterests({ childId }: { childId: string }) {
             {editingNote?.assets && editingNote.assets.length > 0 && (
               <div className="grid w-44 grid-cols-3 gap-1">
                 {editingNote.assets.map((asset, ai) => (
-                  <AssetThumb key={asset.id} asset={asset} onClick={() => setViewingAssets({ assets: editingNote.assets!, index: ai })} />
+                  <AssetThumb
+                    key={asset.id}
+                    asset={asset}
+                    onClick={() => setViewingAssets({ assets: editingNote.assets!, index: ai })}
+                    onDelete={() => {
+                      if (window.confirm(`删除附件「${asset.fileName}」？`)) {
+                        deleteAsset.mutate(asset.id, {
+                          onSuccess: () => {
+                            setEditingNote((current) => current
+                              ? { ...current, assets: (current.assets ?? []).filter((a) => a.id !== asset.id) }
+                              : current
+                            );
+                          },
+                        });
+                      }
+                    }}
+                  />
                 ))}
               </div>
             )}

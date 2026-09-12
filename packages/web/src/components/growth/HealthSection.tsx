@@ -380,7 +380,23 @@ export function HealthSection({ childId }: { childId: string }) {
                 <p className="text-xs text-emerald-600">已上传 {editing.assets!.length} 个附件（点击可查看）</p>
                 <div className="grid w-44 grid-cols-4 gap-1">
                   {(editing.assets ?? []).map((asset, ai) => (
-                    <AssetThumb key={asset.id} asset={asset} onClick={() => setViewingAssets({ assets: editing.assets ?? [], index: ai })} />
+                    <AssetThumb
+                      key={asset.id}
+                      asset={asset}
+                      onClick={() => setViewingAssets({ assets: editing.assets ?? [], index: ai })}
+                      onDelete={() => {
+                        if (window.confirm(`删除附件「${asset.fileName}」？`)) {
+                          deleteAsset.mutate(asset.id, {
+                            onSuccess: () => {
+                              setEditing((current) => current
+                                ? { ...current, assets: (current.assets ?? []).filter((a) => a.id !== asset.id) }
+                                : current
+                              );
+                            },
+                          });
+                        }
+                      }}
+                    />
                   ))}
                 </div>
               </div>

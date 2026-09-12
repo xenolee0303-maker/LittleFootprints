@@ -199,19 +199,6 @@ export function GrowthTimeline({ children, childId }: { children: Child[]; child
                 </div>
                 {isParent && (
                   <div className="flex shrink-0 gap-1">
-                    {event.assets && event.assets.length > 0 && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-gray-400 hover:bg-gray-100"
-                        onClick={() => {
-                          const last = event.assets![event.assets!.length - 1];
-                          if (window.confirm(`删除附件「${last.fileName}」？`)) deleteAsset.mutate(last.id);
-                        }}
-                      >
-                        删附件
-                      </Button>
-                    )}
                     <Button variant="ghost" size="sm" onClick={() => openEdit(event)}>
                       修改
                     </Button>
@@ -324,7 +311,23 @@ export function GrowthTimeline({ children, childId }: { children: Child[]; child
                 <p className="text-xs text-emerald-600">已上传 {editing.assets!.length} 个附件（点击可查看）</p>
                 <div className="grid w-48 grid-cols-4 gap-1">
                   {(editing.assets ?? []).map((asset, ai) => (
-                    <AssetThumb key={asset.id} asset={asset} onClick={() => setViewingAssets({ assets: editing.assets ?? [], index: ai })} />
+                    <AssetThumb
+                      key={asset.id}
+                      asset={asset}
+                      onClick={() => setViewingAssets({ assets: editing.assets ?? [], index: ai })}
+                      onDelete={() => {
+                        if (window.confirm(`删除附件「${asset.fileName}」？`)) {
+                          deleteAsset.mutate(asset.id, {
+                            onSuccess: () => {
+                              setEditing((current) => current
+                                ? { ...current, assets: (current.assets ?? []).filter((a) => a.id !== asset.id) }
+                                : current
+                              );
+                            },
+                          });
+                        }
+                      }}
+                    />
                   ))}
                 </div>
               </div>
