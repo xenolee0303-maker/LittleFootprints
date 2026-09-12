@@ -38,7 +38,16 @@ function registerAssetUpload(app: Parameters<typeof assetRoutes>[0], config: Upl
         return reply.status(400).send({ message: '缺少文件' });
       }
       const maxBytes = Math.max(1, Number(process.env.MAX_ASSET_SIZE_MB ?? 200)) * 1024 * 1024;
-      const buffer = await file.toBuffer();
+      let buffer: Buffer;
+      try {
+        buffer = await file.toBuffer();
+      } catch (error) {
+        const code = (error as { code?: string })?.code;
+        if (code === 'FST_REQ_FILE_TOO_LARGE') {
+          return reply.status(413).send({ message: `文件超过大小限制（${Math.round(maxBytes / 1024 / 1024)}MB），可尝试截图或压缩后再上传` });
+        }
+        throw error;
+      }
       if (buffer.byteLength === 0) {
         return reply.status(400).send({ message: '文件为空' });
       }

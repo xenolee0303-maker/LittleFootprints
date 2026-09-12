@@ -88,17 +88,19 @@ export function DailyJournalSection({ childId }: { childId: string }) {
         ? await updateJournal.mutateAsync({ id: editing.id, date: form.date, content: form.content, mood: form.mood })
         : await createJournal.mutateAsync({ date: form.date, content: form.content, mood: form.mood, authorRole });
       let uploadFailed = 0;
+      let uploadReason = '';
       for (const file of pendingFiles) {
         try {
           await uploadAsset.mutateAsync({ entryId: saved.id, file });
-        } catch {
+        } catch (uploadError) {
           uploadFailed += 1;
+          uploadReason = uploadError instanceof Error ? uploadError.message : uploadReason;
         }
       }
       setFormOpen(false);
       setPendingFiles([]);
       if (uploadFailed > 0) {
-        setSectionNotice(`日志已保存，但 ${uploadFailed} 个附件上传失败——打开该篇的「修改」可重新上传`);
+        setSectionNotice(`日志已保存，但 ${uploadFailed} 个附件上传失败（${uploadReason || '未知原因'}）——打开该篇的「修改」可重新上传`);
       }
     } catch (error) {
       setUploadError(error instanceof Error ? error.message : '保存或上传失败，请重试');

@@ -218,3 +218,37 @@ test('growth event assets upload, aggregate and cascade', async (t) => {
 
   await app.close();
 });
+
+test('uploads over MAX_ASSET_SIZE_MB return a clear 413', async (t) => {
+  process.env.MAX_ASSET_SIZE_MB = '1';
+  const { buildApp } = await import('../app.js');
+  const app = await buildApp();
+  const childId = await createChild(app);
+  const interest = await app.inject({
+    method: 'POST', url: `/api/children/${childId}/interests`,
+    payload: { name: '钢琴', category: 'art', startedAt: '2026-01-05' },
+  });
+  const interestId = JSON.parse(interest.payload).id;
+  const note = await app.inject({
+    method: 'POST', url: `/api/interests/${interestId}/notes`,
+    payload: { date: '2026-09-12', type: 'practice', content: '大文件', authorRole: 'parent' },
+  });
+  const noteId = JSON.parse(note.payload).id;
+
+  const big = Buffer.alloc(1536 * 1024, 1); // 1.5MB > 1MB limit
+  const res = await app.inject({
+    method: 'POST', url: `/api/interest-notes/${noteId}/assets`,
+    ...multipartBody('file', 'big.jpg', 'image/jpeg', big),
+  });
+  assert.strictEqual(res.statusCode, 413);
+  assert.ok(JSON.parse(res.payload).message.includes('超过大小限制'));
+
+  const ok = await app.inject({
+    method: 'POST', url: `/api/interest-notes/${noteId}/assets`,
+    ...multipartBody('file', 'small.jpg', 'image/jpeg', Buffer.alloc(512 * 1024, 2)),
+  });
+  assert.strictEqual(ok.statusCode, 201);
+
+  delete process.env.MAX_ASSET_SIZE_MB;
+  await app.close();
+});

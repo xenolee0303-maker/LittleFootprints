@@ -59,7 +59,9 @@ export async function buildApp(options: BuildAppOptions = {}) {
   await app.register(growthMeasurementRoutes);
   await app.register(interestRoutes);
   await app.register(growthEventRoutes);
-  await app.register(multipart, { limits: { files: 1 } });
+  // Allow real phone photos/videos: default multipart limit is only 1MB.
+  const maxAssetBytes = Math.max(1, Number(process.env.MAX_ASSET_SIZE_MB ?? 200)) * 1024 * 1024;
+  await app.register(multipart, { limits: { files: 1, fileSize: maxAssetBytes } });
   await app.register(mediaRoutes);
   await app.register(assetRoutes);
   await app.register(journalRoutes);
