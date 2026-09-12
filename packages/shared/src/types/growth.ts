@@ -241,3 +241,48 @@ export type CreateHealthRecordInput = {
 };
 
 export type UpdateHealthRecordInput = Partial<CreateHealthRecordInput>;
+
+// ── kid-study integration (read-only learning bridge) ────
+
+export interface KidStudyBridgeStatus {
+  configured: boolean;
+  baseUrl: string | null;
+}
+
+export interface KidStudyChildOption {
+  id: string;
+  name: string;
+}
+
+export interface ChildIntegration {
+  childId: string;
+  kidstudyChildId: string;
+  kidstudyChildName: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LearningCourseSummary {
+  name: string;
+  flowerEarned: number;
+}
+
+/** Read-only learning data pulled from a kid-study instance for one child+week. */
+export interface LearningSummary {
+  weekStart: string;
+  scheduledCount: number;
+  completedCount: number;
+  incompleteCount: number;
+  completionRate: number; // 0-100
+  learningMinutes: number;
+  flowerEarned: number;
+  flowerDeducted: number;
+  flowerNet: number;
+  courses: LearningCourseSummary[];
+}
+
+export interface LearningSummaryResponse {
+  available: boolean;
+  summary?: LearningSummary;
+  message?: string;
+}

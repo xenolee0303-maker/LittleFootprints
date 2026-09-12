@@ -5,6 +5,7 @@ import { GrowthTimeline } from '../components/growth/GrowthTimeline';
 import { GrowthInterests } from '../components/growth/GrowthInterests';
 import { GrowthProfile } from '../components/growth/GrowthProfile';
 import { ChildWeeklySummaryCard } from '../components/growth/ChildWeeklySummary';
+import { LearningOverviewCard } from '../components/growth/LearningOverviewCard';
 import { DailyJournalSection } from '../components/growth/DailyJournalSection';
 import { HealthSection } from '../components/growth/HealthSection';
 import { AiQuestionPanel } from '../components/ai/AiQuestionPanel';
@@ -70,6 +71,8 @@ export function GrowthPage() {
       )}
 
       <ChildWeeklySummaryCard childId={childId} />
+
+      {isParent && <LearningOverviewCard childId={childId} />}
 
       <div className="flex gap-1 rounded-xl bg-gray-100 p-1">
         {SECTIONS.map((item) => (

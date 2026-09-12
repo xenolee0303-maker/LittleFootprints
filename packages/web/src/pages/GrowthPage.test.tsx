@@ -48,6 +48,20 @@ vi.mock('../hooks/useGrowth', async (importOriginal) => {
   };
 });
 
+vi.mock('../hooks/useIntegration', () => ({
+  useKidStudyStatus: () => ({ data: { configured: true, baseUrl: 'http://192.168.3.102:3001' } }),
+  useLearningSummary: () => ({
+    data: {
+      available: true,
+      summary: {
+        weekStart: '2026-09-07', scheduledCount: 4, completedCount: 3, incompleteCount: 1,
+        completionRate: 67, learningMinutes: 120, flowerEarned: 6, flowerDeducted: 1, flowerNet: 5,
+        courses: [{ name: 'kissABC', flowerEarned: 4 }],
+      },
+    },
+  }),
+}));
+
 vi.mock('../components/ai/AiQuestionPanel', () => ({
   AiQuestionPanel: () => <div data-testid="ai-panel" />,
 }));
@@ -225,6 +239,14 @@ describe('GrowthPage', () => {
     await user.click(screen.getByRole('button', { name: '日志' }));
     expect(await screen.findByText('我学会跳绳了！')).toBeInTheDocument();
     expect(screen.getByText('特别开心 😄')).toBeInTheDocument();
+  });
+
+  it('shows the learning overview card from the kid-study bridge', async () => {
+    renderPage();
+    expect(await screen.findByText('📚 本周学习')).toBeInTheDocument();
+    expect(screen.getByText('67%')).toBeInTheDocument();
+    expect(screen.getByText('2时0分')).toBeInTheDocument();
+    expect(screen.getByText('kissABC +4')).toBeInTheDocument();
   });
 
   it('shows the health section with profile card and records', async () => {

@@ -15,6 +15,7 @@ import { mediaRoutes } from './routes/media.js';
 import { assetRoutes } from './routes/assets.js';
 import { journalRoutes } from './routes/journal.js';
 import { healthRecordRoutes } from './routes/health-records.js';
+import { integrationRoutes } from './routes/integrations.js';
 import { aiProviderRoutes } from './routes/ai-provider.js';
 import { aiReportsRoutes } from './routes/ai-reports.js';
 import { aiConversationRoutes } from './routes/ai-conversations.js';
@@ -62,6 +63,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
   await app.register(assetRoutes);
   await app.register(journalRoutes);
   await app.register(healthRecordRoutes);
+  await app.register(integrationRoutes);
   await app.register(aiProviderRoutes);
   await app.register(aiReportsRoutes);
   await app.register(aiConversationRoutes);

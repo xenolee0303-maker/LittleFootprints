@@ -16,7 +16,7 @@ export type AiReportFailureCode =
   | 'generation_failed';
 export type AiConfidence = 'low' | 'medium' | 'high';
 export type AiContextPage = 'growth';
-export type AiContextModule = 'page' | 'interests' | 'growth-timeline' | 'profile' | 'health';
+export type AiContextModule = 'page' | 'interests' | 'growth-timeline' | 'profile' | 'health' | 'learning';
 export type JsonPrimitive = string | number | boolean | null;
 export type JsonValue = JsonPrimitive | JsonValue[] | { [key: string]: JsonValue };
 
@@ -24,7 +24,7 @@ export interface AnalysisEvidence {
   id: string;
   label: string;
   value: string | number;
-  sourceType: 'interest_note' | 'growth_event' | 'journal' | 'health_record' | 'aggregate';
+  sourceType: 'interest_note' | 'growth_event' | 'journal' | 'health_record' | 'learning' | 'aggregate';
   sourceId?: string;
 }
 
@@ -45,6 +45,14 @@ export interface GrowthSnapshotContext {
   }>;
 }
 
+export interface LearningSnapshotContext {
+  configured: boolean;
+  completionRate: number | null;
+  learningMinutes: number | null;
+  flowerEarned: number | null;
+  flowerNet: number | null;
+  courses: Array<{ name: string; flowerEarned: number }>;
+}
 export interface HealthSnapshotContext { allergies: string | null; chronicConditions: string | null; notes: string | null; }
 export interface AnalysisSnapshot {
   childId: string;
@@ -53,6 +61,7 @@ export interface AnalysisSnapshot {
   metrics: Record<string, number | string | null>;
   growth?: GrowthSnapshotContext;
   health?: HealthSnapshotContext;
+  learning?: LearningSnapshotContext;
   evidence: AnalysisEvidence[];
   dataCompleteness: number;
   confidence: AiConfidence;

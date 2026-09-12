@@ -3,6 +3,7 @@ import { api } from '../api/client';
 import { useChildren, useCreateChild, useDeleteChild, useUpdateChild } from '../hooks/useChildren';
 import { useMediaStatus } from '../hooks/useMedia';
 import { AiProviderSettings } from '../components/settings/AiProviderSettings';
+import { KidStudyIntegrationSettings } from '../components/settings/KidStudyIntegrationSettings';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { useQueryClient } from '@tanstack/react-query';
@@ -89,6 +90,8 @@ export function SettingsPage() {
           </Button>
         </div>
       </section>
+
+      <KidStudyIntegrationSettings />
 
       <AiProviderSettings />
 

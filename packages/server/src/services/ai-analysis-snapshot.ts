@@ -8,6 +8,7 @@ import { interestNoteTable } from '../db/schema/interest-note.js';
 import { growthEventTable } from '../db/schema/growth-event.js';
 import { dailyJournalTable } from '../db/schema/daily-journal.js';
 import { healthProfileTable, healthRecordTable } from '../db/schema/health.js';
+import { fetchLearningSummary } from './kidstudy-bridge.js';
 import { getComparisonWeeks, addDays } from './week-utils.js';
 import { getWeekStartDate } from '@littlefootprints/shared';
 
@@ -40,6 +41,7 @@ export async function buildAnalysisSnapshot(
 
   const rangeFrom = range?.dateFrom ?? weeks.current.weekStart;
   const rangeTo = range?.dateTo ?? weeks.current.weekEnd;
+  const learning = await fetchLearningSummary(childId, rangeFrom);
   const [profile, interests, allNotes, allEvents, allJournal, healthProfile, allHealthRecords] = await Promise.all([
     db.select().from(childProfileTable).where(eq(childProfileTable.childId, childId)).get(),
     db.select().from(interestTable).where(eq(interestTable.childId, childId)).all(),
@@ -88,8 +90,17 @@ export async function buildAnalysisSnapshot(
   for (const record of healthInRange) {
     evidenceRows.push(evidence('health_record', record.id, `就诊:${record.title}`, truncate(`${record.date} ${record.type}${record.facility ? ` ${record.facility}` : ''} ${record.summary ?? ''}`, 120)));
   }
+  if (learning.available && learning.summary) {
+    const summary = learning.summary;
+    evidenceRows.push(evidence('learning', `${childId}:${rangeFrom}:rate`, '学习完成率', summary.completionRate));
+    evidenceRows.push(evidence('learning', `${childId}:${rangeFrom}:minutes`, '学习分钟数', summary.learningMinutes));
+    evidenceRows.push(evidence('learning', `${childId}:${rangeFrom}:flowers`, '小红花净得', summary.flowerNet));
+    for (const course of summary.courses) {
+      evidenceRows.push(evidence('learning', `${childId}:${rangeFrom}:course:${course.name}`, `课程:${course.name}`, course.flowerEarned));
+    }
+  }
 
-  const recordCount = notesInRange.length + eventsInRange.length + journalInRange.length + healthInRange.length;
+  const recordCount = notesInRange.length + eventsInRange.length + journalInRange.length + healthInRange.length + (learning.available && learning.summary ? learning.summary.completedCount : 0);
   const completeness = Math.min(1, recordCount / 6);
 
   return {
@@ -107,6 +118,7 @@ export async function buildAnalysisSnapshot(
       growthEventCount: eventsInRange.length,
       journalEntryCount: journalInRange.length,
       healthRecordCount: healthInRange.length,
+      ...(learning.available && learning.summary ? { learningCompletionRate: learning.summary.completionRate, learningMinutes: learning.summary.learningMinutes, learningFlowerEarned: learning.summary.flowerEarned, learningFlowerNet: learning.summary.flowerNet } : {}),
       totalInterestCount: interests.length,
     },
     health: {
@@ -114,6 +126,14 @@ export async function buildAnalysisSnapshot(
       chronicConditions: healthProfile?.chronicConditions ?? null,
       notes: healthProfile?.notes ?? null,
     },
+    learning: learning.available && learning.summary ? {
+      configured: true,
+      completionRate: learning.summary.completionRate,
+      learningMinutes: learning.summary.learningMinutes,
+      flowerEarned: learning.summary.flowerEarned,
+      flowerNet: learning.summary.flowerNet,
+      courses: learning.summary.courses,
+    } : { configured: false, completionRate: null, learningMinutes: null, flowerEarned: null, flowerNet: null, courses: [] },
     growth: {
       background: profile?.aiBackground ?? null,
       schoolStage: profile?.schoolStage ?? null,

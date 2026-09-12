@@ -6,6 +6,7 @@ export interface AiReportInput {
   range: AnalysisSnapshot['range'];
   metrics: AnalysisSnapshot['metrics'];
   growth?: AnalysisSnapshot['growth'];
+  learning?: AnalysisSnapshot['learning'];
   evidence: Array<{ id: string; label: string; value: string | number }>;
   dataCompleteness: number;
   confidence: AnalysisSnapshot['confidence'];
@@ -18,6 +19,7 @@ export function buildAiReportInput(snapshot: AnalysisSnapshot): AiReportInput {
     range: snapshot.range,
     metrics: snapshot.metrics,
     growth: snapshot.growth,
+    learning: snapshot.learning,
     evidence: snapshot.evidence.map(({ id, label, value }) => ({ id, label, value })),
     dataCompleteness: snapshot.dataCompleteness,
     confidence: snapshot.confidence,
