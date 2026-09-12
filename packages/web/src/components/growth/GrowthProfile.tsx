@@ -14,11 +14,11 @@ import { Input } from '../ui/Input';
 import { Modal } from '../ui/Modal';
 
 function GrowthCurve({ measurements }: { measurements: GrowthMeasurement[] }) {
-  const [metric, setMetric] = useState<'height' | 'weight'>('height');
+  const [metric, setMetric] = useState<'height' | 'weight' | 'head'>('height');
 
   const points = useMemo(() => {
     return measurements
-      .map((m) => ({ date: m.date, value: metric === 'height' ? m.heightCm : m.weightKg }))
+      .map((m) => ({ date: m.date, value: metric === 'height' ? m.heightCm : metric === 'weight' ? m.weightKg : m.headCm }))
       .filter((p): p is { date: string; value: number } => p.value !== null && p.value !== undefined)
       .sort((a, b) => (a.date < b.date ? -1 : 1));
   }, [measurements, metric]);
@@ -26,7 +26,7 @@ function GrowthCurve({ measurements }: { measurements: GrowthMeasurement[] }) {
   if (points.length < 2) {
     return (
       <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50 p-6 text-center text-sm text-gray-400">
-        再记录一次{metric === 'height' ? '身高' : '体重'}就能看到成长曲线啦
+        再记录一次{metric === 'height' ? '身高' : metric === 'weight' ? '体重' : '头围'}就能看到成长曲线啦
       </div>
     );
   }
@@ -41,14 +41,14 @@ function GrowthCurve({ measurements }: { measurements: GrowthMeasurement[] }) {
   const x = (index: number) => padding + (index / (points.length - 1)) * (width - padding * 2);
   const y = (value: number) => padding + (1 - (value - minValue) / valueSpan) * (height - padding * 2);
 
-  const unit = metric === 'height' ? 'cm' : 'kg';
+  const unit = metric === 'height' ? 'cm' : metric === 'weight' ? 'kg' : 'cm';
 
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-4">
       <div className="mb-2 flex items-center justify-between">
         <span className="text-sm font-medium text-gray-700">生长曲线</span>
         <div className="flex gap-1">
-          {(['height', 'weight'] as const).map((key) => (
+          {(['height', 'weight', 'head'] as const).map((key) => (
             <button
               key={key}
               type="button"
@@ -57,7 +57,7 @@ function GrowthCurve({ measurements }: { measurements: GrowthMeasurement[] }) {
                 metric === key ? 'bg-indigo-50 text-primary font-medium' : 'text-gray-500 hover:bg-gray-100'
               }`}
             >
-              {key === 'height' ? '身高' : '体重'}
+              {key === 'height' ? '身高' : key === 'weight' ? '体重' : '头围'}
             </button>
           ))}
         </div>
@@ -112,6 +112,7 @@ interface MeasurementFormState {
   date: string;
   heightCm: string;
   weightKg: string;
+  headCm: string;
   note: string;
 }
 
@@ -133,6 +134,7 @@ export function GrowthProfile({ childId }: { childId: string }) {
     date: new Date().toISOString().slice(0, 10),
     heightCm: '',
     weightKg: '',
+    headCm: '',
     note: '',
   });
 
@@ -154,7 +156,7 @@ export function GrowthProfile({ childId }: { childId: string }) {
   };
 
   const openMeasurementCreate = () => {
-    setMeasurementForm({ date: new Date().toISOString().slice(0, 10), heightCm: '', weightKg: '', note: '' });
+    setMeasurementForm({ date: new Date().toISOString().slice(0, 10), heightCm: '', weightKg: '', headCm: '', note: '' });
     setEditingMeasurement(null);
     setMeasurementOpen(true);
   };
@@ -164,6 +166,7 @@ export function GrowthProfile({ childId }: { childId: string }) {
       date: measurement.date,
       heightCm: measurement.heightCm?.toString() ?? '',
       weightKg: measurement.weightKg?.toString() ?? '',
+      headCm: measurement.headCm?.toString() ?? '',
       note: measurement.note ?? '',
     });
     setEditingMeasurement(measurement);
@@ -175,6 +178,7 @@ export function GrowthProfile({ childId }: { childId: string }) {
       date: measurementForm.date,
       heightCm: measurementForm.heightCm === '' ? null : Number(measurementForm.heightCm),
       weightKg: measurementForm.weightKg === '' ? null : Number(measurementForm.weightKg),
+      headCm: measurementForm.headCm === '' ? null : Number(measurementForm.headCm),
       note: measurementForm.note || null,
     };
     if (editingMeasurement) {
@@ -186,7 +190,7 @@ export function GrowthProfile({ childId }: { childId: string }) {
 
   const measurementValid =
     /^\d{4}-\d{2}-\d{2}$/.test(measurementForm.date) &&
-    (measurementForm.heightCm !== '' || measurementForm.weightKg !== '');
+    (measurementForm.heightCm !== '' || measurementForm.weightKg !== '' || measurementForm.headCm !== '');
 
   const latestHeight = measurements?.find((m) => m.heightCm !== null)?.heightCm;
   const latestWeight = measurements?.find((m) => m.weightKg !== null)?.weightKg;
@@ -256,6 +260,7 @@ export function GrowthProfile({ childId }: { childId: string }) {
                 <th className="px-3 py-2 text-left font-medium">日期</th>
                 <th className="px-3 py-2 text-right font-medium">身高</th>
                 <th className="px-3 py-2 text-right font-medium">体重</th>
+                <th className="px-3 py-2 text-right font-medium">头围</th>
                 <th className="px-3 py-2 text-left font-medium">备注</th>
                 {isParent && <th className="px-3 py-2" />}
               </tr>
@@ -266,6 +271,7 @@ export function GrowthProfile({ childId }: { childId: string }) {
                   <td className="px-3 py-2 text-gray-700">{measurement.date}</td>
                   <td className="px-3 py-2 text-right text-gray-700">{measurement.heightCm ?? '—'}</td>
                   <td className="px-3 py-2 text-right text-gray-700">{measurement.weightKg ?? '—'}</td>
+                  <td className="px-3 py-2 text-right text-gray-700">{measurement.headCm ?? '—'}</td>
                   <td className="px-3 py-2 text-gray-500">{measurement.note ?? ''}</td>
                   {isParent && (
                     <td className="px-3 py-2 text-right whitespace-nowrap">
@@ -344,7 +350,7 @@ export function GrowthProfile({ childId }: { childId: string }) {
         title={editingMeasurement ? '修改记录' : '新增身高体重记录'}
       >
         <div className="space-y-3">
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <Input
               label="日期"
               type="date"
@@ -367,6 +373,14 @@ export function GrowthProfile({ childId }: { childId: string }) {
               onChange={(e) => setMeasurementForm((f) => ({ ...f, weightKg: e.target.value }))}
               placeholder="可选"
             />
+            <Input
+              label="头围 (cm)"
+              type="number"
+              step="0.1"
+              value={measurementForm.headCm}
+              onChange={(e) => setMeasurementForm((f) => ({ ...f, headCm: e.target.value }))}
+              placeholder="可选"
+            />
           </div>
           <Input
             label="备注"
@@ -375,7 +389,7 @@ export function GrowthProfile({ childId }: { childId: string }) {
             placeholder="可选，如：学校体检"
           />
           {(createMeasurement.isError || updateMeasurement.isError) && (
-            <p className="text-xs text-red-500">保存失败：身高和体重至少填一项</p>
+            <p className="text-xs text-red-500">保存失败：身高、体重、头围至少填一项</p>
           )}
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="secondary" onClick={() => setMeasurementOpen(false)}>

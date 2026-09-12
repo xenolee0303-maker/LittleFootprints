@@ -14,6 +14,7 @@ import * as mediaAssetSchema from './schema/media-asset.js';
 import * as dailyJournalSchema from './schema/daily-journal.js';
 import * as healthSchema from './schema/health.js';
 import * as integrationSchema from './schema/integration.js';
+import * as vaccineRecordSchema from './schema/vaccine-record.js';
 import * as aiProviderConfigSchema from './schema/ai-provider-config.js';
 import * as aiAnalysisReportSchema from './schema/ai-analysis-report.js';
 
@@ -37,6 +38,7 @@ const schema = {
   ...dailyJournalSchema,
   ...healthSchema,
   ...integrationSchema,
+  ...vaccineRecordSchema,
   ...aiProviderConfigSchema,
   ...aiAnalysisReportSchema,
 };

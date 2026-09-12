@@ -16,6 +16,7 @@ import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { EmptyState } from '../shared/EmptyState';
 import { AssetViewer, AssetThumb } from './AssetViewer';
+import { VaccineSection } from './VaccineSection';
 import type { MediaAssetInfo } from '@littlefootprints/shared';
 
 const RECORD_TYPES = Object.keys(HEALTH_RECORD_TYPE_LABELS) as HealthRecordType[];
@@ -229,6 +230,8 @@ export function HealthSection({ childId }: { childId: string }) {
           ))}
         </div>
       )}
+
+      <VaccineSection childId={childId} />
 
       <Modal open={profileOpen} onClose={() => setProfileOpen(false)} title="身体基础信息">
         <div className="space-y-3">

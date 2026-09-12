@@ -20,7 +20,7 @@ function readMeasurementFields(
   if (!isValidDate(body.date)) return { error: `${message}: date must be a real YYYY-MM-DD date` };
   input.date = body.date;
 
-  for (const field of ['heightCm', 'weightKg'] as const) {
+  for (const field of ['heightCm', 'weightKg', 'headCm'] as const) {
     if (hasOwn(body, field)) {
       const value = body[field];
       if (value === null || value === '' || value === undefined) continue;
@@ -34,8 +34,8 @@ function readMeasurementFields(
     input.note = normalizeNullableText(body.note);
   }
 
-  if (input.heightCm === undefined && input.weightKg === undefined) {
-    return { error: `${message}: at least one of heightCm or weightKg is required` };
+  if (input.heightCm === undefined && input.weightKg === undefined && input.headCm === undefined) {
+    return { error: `${message}: at least one of heightCm, weightKg or headCm is required` };
   }
   return input;
 }
@@ -83,7 +83,7 @@ export async function growthMeasurementRoutes(app: FastifyInstance) {
       }
       input.date = body.date;
     }
-    for (const field of ['heightCm', 'weightKg'] as const) {
+    for (const field of ['heightCm', 'weightKg', 'headCm'] as const) {
       if (hasOwn(body, field)) {
         const value = body[field];
         if (value === null || value === '') {
@@ -104,8 +104,9 @@ export async function growthMeasurementRoutes(app: FastifyInstance) {
 
     const nextHeight = input.heightCm !== undefined ? input.heightCm : existing.heightCm;
     const nextWeight = input.weightKg !== undefined ? input.weightKg : existing.weightKg;
-    if (nextHeight === null && nextWeight === null) {
-      return reply.status(400).send({ message: 'at least one of heightCm or weightKg is required' });
+    const nextHead = input.headCm !== undefined ? input.headCm : existing.headCm;
+    if (nextHeight === null && nextWeight === null && nextHead === null) {
+      return reply.status(400).send({ message: 'at least one of heightCm, weightKg or headCm is required' });
     }
 
     const measurement = await measurementService.updateMeasurement(id, input);

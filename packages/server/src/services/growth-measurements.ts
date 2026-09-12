@@ -30,6 +30,7 @@ export async function createMeasurement(
     date: input.date,
     heightCm: input.heightCm ?? null,
     weightKg: input.weightKg ?? null,
+    headCm: input.headCm ?? null,
     note: input.note ?? null,
     createdAt: now,
     updatedAt: now,

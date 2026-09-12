@@ -48,6 +48,7 @@ export interface GrowthMeasurement {
   date: string; // YYYY-MM-DD
   heightCm: number | null;
   weightKg: number | null;
+  headCm: number | null; // 头围
   note: string | null;
   createdAt: string;
   updatedAt: string;
@@ -57,6 +58,7 @@ export type CreateGrowthMeasurementInput = {
   date: string;
   heightCm?: number | null;
   weightKg?: number | null;
+  headCm?: number | null;
   note?: string | null;
 };
 
@@ -285,4 +287,35 @@ export interface LearningSummaryResponse {
   available: boolean;
   summary?: LearningSummary;
   message?: string;
+}
+
+// ── Vaccination ──────────────────────────────────────────
+
+export interface VaccineRecord {
+  id: string;
+  childId: string;
+  name: string;             // 疫苗名，如 乙肝疫苗
+  dose: string;             // 剂次，如 第1剂
+  scheduledDate: string | null; // 应种日期（按出生日期推算）
+  administeredDate: string | null; // 实际接种日期
+  note: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type CreateVaccineRecordInput = {
+  name: string;
+  dose: string;
+  scheduledDate?: string | null;
+  administeredDate?: string | null;
+  note?: string | null;
+};
+
+export type UpdateVaccineRecordInput = Partial<CreateVaccineRecordInput>;
+
+/** One entry of the national immunization program template (months after birth). */
+export interface VaccineTemplateItem {
+  name: string;
+  dose: string;
+  monthsAfterBirth: number;
 }

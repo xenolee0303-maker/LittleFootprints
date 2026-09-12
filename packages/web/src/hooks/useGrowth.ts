@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../api/client';
 import type {
+  VaccineRecord,
   HealthProfile,
   HealthRecord,
   DailyJournal,
@@ -368,5 +369,59 @@ export function useUploadHealthAsset() {
       return response.json();
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['health-records'] }),
+  });
+}
+
+// ── Vaccines ─────────────────────────────────────────────
+
+export function useVaccines(childId: string | undefined) {
+  return useQuery({
+    queryKey: ['vaccines', childId],
+    queryFn: () => api.get<VaccineRecord[]>(`/children/${childId}/vaccines`),
+    enabled: !!childId,
+  });
+}
+
+export function useCreateVaccine(childId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { name: string; dose: string; scheduledDate?: string | null; administeredDate?: string | null; note?: string | null }) =>
+      api.post<VaccineRecord>(`/children/${childId}/vaccines`, input),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['vaccines', childId] }),
+  });
+}
+
+export function useUpdateVaccine() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...input }: { id: string } & Partial<{ name: string; dose: string; scheduledDate?: string | null; administeredDate?: string | null; note?: string | null }>) =>
+      api.patch<VaccineRecord>(`/vaccines/${id}`, input),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['vaccines'] }),
+  });
+}
+
+export function useAdministerVaccine() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, date }: { id: string; date?: string }) =>
+      api.post<VaccineRecord>(`/vaccines/${id}/administer`, { date }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['vaccines'] }),
+  });
+}
+
+export function useDeleteVaccine() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.delete<{ success: boolean }>(`/vaccines/${id}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['vaccines'] }),
+  });
+}
+
+export function useGenerateVaccineTemplate() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (childId: string) =>
+      api.post<{ created: number }>(`/children/${childId}/vaccines/generate`, {}),
+    onSuccess: (_result, generatorChildId) => qc.invalidateQueries({ queryKey: ['vaccines', generatorChildId] }),
   });
 }

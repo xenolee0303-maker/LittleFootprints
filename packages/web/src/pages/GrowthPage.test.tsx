@@ -36,11 +36,20 @@ vi.mock('../hooks/useGrowth', async (importOriginal) => {
     useUpdateHealthRecord: () => ({ mutateAsync: vi.fn(), isPending: false, isError: false }),
     useDeleteHealthRecord: () => ({ mutate: vi.fn(), isPending: false, isError: false }),
     useUploadHealthAsset: () => ({ mutateAsync: vi.fn(), isPending: false, isError: false }),
+    useVaccines: () => ({ data: [
+      { id: 'v1', childId: 'child-1', name: '乙肝疫苗', dose: '第1剂', scheduledDate: '2024-06-15', administeredDate: '2024-06-16', note: null, createdAt: '', updatedAt: '' },
+      { id: 'v2', childId: 'child-1', name: '流感疫苗', dose: '第1剂', scheduledDate: '2026-01-01', administeredDate: null, note: null, createdAt: '', updatedAt: '' },
+    ], isLoading: false }),
+    useCreateVaccine: () => ({ mutate: vi.fn(), isPending: false, isError: false }),
+    useUpdateVaccine: () => ({ mutate: vi.fn(), isPending: false, isError: false }),
+    useAdministerVaccine: () => ({ mutate: vi.fn(), isPending: false, isError: false }),
+    useDeleteVaccine: () => ({ mutate: vi.fn(), isPending: false, isError: false }),
+    useGenerateVaccineTemplate: () => ({ mutate: vi.fn(), isPending: false }),
+    useProfile: () => ({ data: { childId: 'child-1', birthDate: '2024-06-15', schoolStage: null, personality: null, aiBackground: null, createdAt: '', updatedAt: '' } }),
     useCreateJournal: () => ({ mutateAsync: vi.fn(), isPending: false, isError: false }),
     useUpdateJournal: () => ({ mutateAsync: vi.fn(), isPending: false, isError: false }),
     useDeleteJournal: () => ({ mutate: vi.fn(), isPending: false, isError: false }),
     useUploadJournalAsset: () => ({ mutateAsync: vi.fn(), isPending: false, isError: false }),
-    useProfile: () => ({ data: undefined }),
     useMeasurements: () => ({ data: [] }),
     useCreateGrowthEvent: () => ({ mutate: vi.fn(), isPending: false, isError: false }),
     useUpdateGrowthEvent: () => ({ mutate: vi.fn(), isPending: false, isError: false }),
@@ -247,6 +256,16 @@ describe('GrowthPage', () => {
     expect(screen.getByText('67%')).toBeInTheDocument();
     expect(screen.getByText('2时0分')).toBeInTheDocument();
     expect(screen.getByText('kissABC +4')).toBeInTheDocument();
+  });
+
+  it('shows the vaccine section with due and done groups', async () => {
+    const { userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    renderPage();
+    await user.click(screen.getByRole('button', { name: '健康' }));
+    expect(await screen.findByText('疫苗接种')).toBeInTheDocument();
+    expect(screen.getByText(/已到期待种/)).toBeInTheDocument();
+    expect(screen.getByText(/乙肝疫苗 · 第1剂/)).toBeInTheDocument();
   });
 
   it('shows the health section with profile card and records', async () => {

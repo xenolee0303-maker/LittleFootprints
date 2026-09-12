@@ -1,13 +1,13 @@
-import { sqliteTable, text, real } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text } from 'drizzle-orm/sqlite-core';
 import { childTable } from './child.js';
 
-export const growthMeasurementTable = sqliteTable('growth_measurement', {
+export const vaccineRecordTable = sqliteTable('vaccine_record', {
   id: text('id').primaryKey(),
   childId: text('child_id').notNull().references(() => childTable.id, { onDelete: 'cascade' }),
-  date: text('date').notNull(),
-  heightCm: real('height_cm'),
-  weightKg: real('weight_kg'),
-  headCm: real('head_cm'),
+  name: text('name').notNull(),
+  dose: text('dose').notNull(),
+  scheduledDate: text('scheduled_date'),
+  administeredDate: text('administered_date'),
   note: text('note'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),

@@ -43,6 +43,13 @@
             "when": 1789188716257,
             "tag": "0005_integration",
             "breakpoints": true
+        },
+        {
+            "idx": 6,
+            "version": "7",
+            "when": 1789192059995,
+            "tag": "0006_head_vaccine",
+            "breakpoints": true
         }
     ]
 }
