@@ -88,7 +88,7 @@ vi.mock('../hooks/useMedia', () => ({
   mediaOriginalUrl: (path: string) => `/api/media/original?path=${path}`,
 }));
 
-const child: Child = { id: 'child-1', name: '小明', createdAt: '', updatedAt: '' };
+const child: Child = { id: 'child-1', name: '小明', gender: 'female', createdAt: '', updatedAt: '' };
 
 function renderPage() {
   const queryClient = new QueryClient({

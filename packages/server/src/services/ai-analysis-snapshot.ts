@@ -9,6 +9,7 @@ import { growthEventTable } from '../db/schema/growth-event.js';
 import { dailyJournalTable } from '../db/schema/daily-journal.js';
 import { healthProfileTable, healthRecordTable } from '../db/schema/health.js';
 import { fetchLearningSummary } from './kidstudy-bridge.js';
+import { computeBazi } from './bazi.js';
 import { getComparisonWeeks, addDays } from './week-utils.js';
 import { getWeekStartDate } from '@littlefootprints/shared';
 
@@ -51,6 +52,7 @@ export async function buildAnalysisSnapshot(
     db.select().from(healthProfileTable).where(eq(healthProfileTable.childId, childId)).get(),
     db.select().from(healthRecordTable).where(eq(healthRecordTable.childId, childId)).all(),
   ]);
+  const bazi = computeBazi({ birthDate: profile?.birthDate ?? null, birthTime: profile?.birthTime ?? null });
 
   const interestById = new Map(interests.map((i) => [i.id, i]));
   const notesInRange = allNotes.filter((n) => interestById.has(n.interestId) && n.date >= rangeFrom && n.date <= rangeTo);
@@ -90,6 +92,11 @@ export async function buildAnalysisSnapshot(
   for (const record of healthInRange) {
     evidenceRows.push(evidence('health_record', record.id, `就诊:${record.title}`, truncate(`${record.date} ${record.type}${record.facility ? ` ${record.facility}` : ''} ${record.summary ?? ''}`, 120)));
   }
+  if (bazi.available) {
+    for (const fe of bazi.fiveElements) {
+      evidenceRows.push(evidence('aggregate', `${childId}:bazi:${fe.element}`, `五行·${fe.element}`, fe.count));
+    }
+  }
   if (learning.available && learning.summary) {
     const summary = learning.summary;
     evidenceRows.push(evidence('learning', `${childId}:${rangeFrom}:rate`, '学习完成率', summary.completionRate));
@@ -121,6 +128,16 @@ export async function buildAnalysisSnapshot(
       ...(learning.available && learning.summary ? { learningCompletionRate: learning.summary.completionRate, learningMinutes: learning.summary.learningMinutes, learningFlowerEarned: learning.summary.flowerEarned, learningFlowerNet: learning.summary.flowerNet } : {}),
       totalInterestCount: interests.length,
     },
+    bazi: bazi.available ? {
+      lunarDate: bazi.lunarDate,
+      zodiac: bazi.zodiac,
+      xingZuo: bazi.xingZuo,
+      timeKnown: bazi.timeKnown,
+      pillars: bazi.pillars.map((p) => `${p.pillar}柱 ${p.ganZhi}（${p.wuXing}·${p.naYin}）`),
+      fiveElements: bazi.fiveElements,
+      dayMaster: bazi.dayMaster,
+      note: '传统命理历法计算，仅供文化趣味视角',
+    } : undefined,
     health: {
       allergies: healthProfile?.allergies ?? null,
       chronicConditions: healthProfile?.chronicConditions ?? null,

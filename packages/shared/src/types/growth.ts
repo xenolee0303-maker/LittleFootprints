@@ -28,9 +28,16 @@ export type GrowthEventType =
   | 'observation'
   | 'other';
 
+export type BloodType = 'A' | 'B' | 'AB' | 'O' | 'unknown';
+
 export interface ChildProfile {
   childId: string;
   birthDate: string | null;
+  birthTime: string | null;      // HH:mm
+  gender: 'female' | 'male' | 'unspecified';
+  bloodType: BloodType | null;
+  fatherHeightCm: number | null;
+  motherHeightCm: number | null;
   schoolStage: string | null;
   personality: string | null;
   aiBackground: string | null;
@@ -39,7 +46,7 @@ export interface ChildProfile {
 }
 
 export type UpsertChildProfileInput = Partial<
-  Pick<ChildProfile, 'birthDate' | 'schoolStage' | 'personality' | 'aiBackground'>
+  Pick<ChildProfile, 'birthDate' | 'birthTime' | 'gender' | 'bloodType' | 'fatherHeightCm' | 'motherHeightCm' | 'schoolStage' | 'personality' | 'aiBackground'>
 >;
 
 export interface GrowthMeasurement {
@@ -318,4 +325,31 @@ export interface VaccineTemplateItem {
   name: string;
   dose: string;
   monthsAfterBirth: number;
+}
+
+// ── 生辰八字（传统命理历法计算，文化趣味参考） ──────────
+
+export interface BaziPillar {
+  pillar: '年' | '月' | '日' | '时';
+  ganZhi: string;
+  wuXing: string;
+  naYin: string;
+}
+
+export interface BaziResult {
+  available: true;
+  solarDate: string;
+  lunarDate: string;
+  zodiac: string;
+  xingZuo: string;
+  pillars: BaziPillar[];
+  timeKnown: boolean;
+  fiveElements: Array<{ element: string; count: number }>;
+  dayMaster: string;
+  dayStem: string;
+}
+
+export interface BaziUnavailable {
+  available: false;
+  reason: 'no_birth_date';
 }

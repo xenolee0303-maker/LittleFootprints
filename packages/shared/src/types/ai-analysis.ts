@@ -53,6 +53,16 @@ export interface LearningSnapshotContext {
   flowerNet: number | null;
   courses: Array<{ name: string; flowerEarned: number }>;
 }
+export interface BaziSnapshotContext {
+  lunarDate: string;
+  zodiac: string;
+  xingZuo: string;
+  timeKnown: boolean;
+  pillars: string[];
+  fiveElements: Array<{ element: string; count: number }>;
+  dayMaster: string;
+  note: string;
+}
 export interface HealthSnapshotContext { allergies: string | null; chronicConditions: string | null; notes: string | null; }
 export interface AnalysisSnapshot {
   childId: string;
@@ -61,6 +71,7 @@ export interface AnalysisSnapshot {
   metrics: Record<string, number | string | null>;
   growth?: GrowthSnapshotContext;
   health?: HealthSnapshotContext;
+  bazi?: BaziSnapshotContext;
   learning?: LearningSnapshotContext;
   evidence: AnalysisEvidence[];
   dataCompleteness: number;

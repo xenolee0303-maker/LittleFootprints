@@ -17,6 +17,7 @@ import { journalRoutes } from './routes/journal.js';
 import { healthRecordRoutes } from './routes/health-records.js';
 import { integrationRoutes } from './routes/integrations.js';
 import { vaccineRoutes } from './routes/vaccines.js';
+import { baziRoutes } from './routes/bazi.js';
 import { aiProviderRoutes } from './routes/ai-provider.js';
 import { aiReportsRoutes } from './routes/ai-reports.js';
 import { aiConversationRoutes } from './routes/ai-conversations.js';
@@ -68,6 +69,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
   await app.register(healthRecordRoutes);
   await app.register(integrationRoutes);
   await app.register(vaccineRoutes);
+  await app.register(baziRoutes);
   await app.register(aiProviderRoutes);
   await app.register(aiReportsRoutes);
   await app.register(aiConversationRoutes);

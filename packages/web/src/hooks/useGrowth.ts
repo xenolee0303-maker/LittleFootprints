@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../api/client';
 import type {
+  BaziResult,
+  BaziUnavailable,
   VaccineRecord,
   HealthProfile,
   HealthRecord,
@@ -429,5 +431,14 @@ export function useGenerateVaccineTemplate() {
     mutationFn: (childId: string) =>
       api.post<{ created: number }>(`/children/${childId}/vaccines/generate`, {}),
     onSuccess: (_result, generatorChildId) => qc.invalidateQueries({ queryKey: ['vaccines', generatorChildId] }),
+  });
+}
+
+export function useBazi(childId: string | undefined) {
+  return useQuery({
+    queryKey: ['bazi', childId],
+    queryFn: () => api.get<BaziResult | BaziUnavailable>(`/children/${childId}/bazi`),
+    enabled: !!childId,
+    staleTime: 60 * 60 * 1000,
   });
 }

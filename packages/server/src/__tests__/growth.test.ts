@@ -37,7 +37,8 @@ test('child profile API', async (t) => {
     const body2 = JSON.parse(put2.payload);
     assert.strictEqual(body2.birthDate, null);
     assert.strictEqual(body2.schoolStage, '小学三年级');
-    assert.strictEqual(body2.aiBackground, null);
+    // Partial upsert preserves fields not present in the payload.
+    assert.strictEqual(body2.aiBackground, '背景A');
 
     const get = await app.inject({ method: 'GET', url: `/api/children/${childId}/profile` });
     assert.strictEqual(JSON.parse(get.payload).schoolStage, '小学三年级');
@@ -49,6 +50,39 @@ test('child profile API', async (t) => {
       payload: { birthDate: '2019-13-40' },
     });
     assert.strictEqual(res.statusCode, 400);
+  });
+
+  await t.test('bazi endpoint computes pillars from saved birth date', async () => {
+    await app.inject({
+      method: 'PUT', url: `/api/children/${childId}/profile`,
+      payload: { birthDate: '2019-05-20', birthTime: '14:30', gender: 'female', bloodType: 'A', fatherHeightCm: 175, motherHeightCm: 162 },
+    });
+    const res = await app.inject({ method: 'GET', url: `/api/children/${childId}/bazi` });
+    assert.strictEqual(res.statusCode, 200);
+    const bazi = JSON.parse(res.payload);
+    assert.strictEqual(bazi.available, true);
+    assert.strictEqual(bazi.pillars.length, 4);
+    assert.strictEqual(bazi.zodiac, '猪');
+    assert.strictEqual(bazi.xingZuo, '金牛');
+    assert.ok(bazi.lunarDate.includes('四月'));
+    const sum = bazi.fiveElements.reduce((total: number, fe: any) => total + fe.count, 0);
+    assert.strictEqual(sum, 8); // 四柱八字共八个字
+    assert.ok(['金', '木', '水', '火', '土'].includes(bazi.dayMaster));
+  });
+
+  await t.test('bazi without birth date reports unavailable', async () => {
+    const other = await createChild(app, '无生日');
+    const res = await app.inject({ method: 'GET', url: `/api/children/${other}/bazi` });
+    assert.strictEqual(res.statusCode, 200);
+    assert.strictEqual(JSON.parse(res.payload).available, false);
+  });
+
+  await t.test('profile new fields round-trip and validation', async () => {
+    const put = await app.inject({
+      method: 'PUT', url: `/api/children/${childId}/profile`,
+      payload: { birthTime: 'bad', bloodType: 'X', fatherHeightCm: 9999 },
+    });
+    assert.strictEqual(put.statusCode, 400);
   });
 
   await t.test('PUT profile 404 for unknown child', async () => {

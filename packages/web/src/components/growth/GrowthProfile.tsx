@@ -9,6 +9,8 @@ import {
   useDeleteMeasurement,
 } from '../../hooks/useGrowth';
 import { usePerspective } from '../../lib/perspective';
+import { useBazi } from '../../hooks/useGrowth';
+import { BaziCard } from './BaziCard';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Modal } from '../ui/Modal';
@@ -94,6 +96,11 @@ function GrowthCurve({ measurements }: { measurements: GrowthMeasurement[] }) {
 
 interface ProfileFormState {
   birthDate: string;
+  birthTime: string;
+  gender: string;
+  bloodType: string;
+  fatherHeightCm: string;
+  motherHeightCm: string;
   schoolStage: string;
   personality: string;
   aiBackground: string;
@@ -102,6 +109,11 @@ interface ProfileFormState {
 function profileToForm(profile: ChildProfile | undefined): ProfileFormState {
   return {
     birthDate: profile?.birthDate ?? '',
+    birthTime: profile?.birthTime ?? '',
+    gender: profile?.gender ?? 'unspecified',
+    bloodType: profile?.bloodType ?? '',
+    fatherHeightCm: profile?.fatherHeightCm?.toString() ?? '',
+    motherHeightCm: profile?.motherHeightCm?.toString() ?? '',
     schoolStage: profile?.schoolStage ?? '',
     personality: profile?.personality ?? '',
     aiBackground: profile?.aiBackground ?? '',
@@ -126,7 +138,7 @@ export function GrowthProfile({ childId }: { childId: string }) {
   const deleteMeasurement = useDeleteMeasurement();
 
   const [profileOpen, setProfileOpen] = useState(false);
-  const [profileForm, setProfileForm] = useState<ProfileFormState>({ birthDate: '', schoolStage: '', personality: '', aiBackground: '' });
+  const [profileForm, setProfileForm] = useState<ProfileFormState>({ birthDate: '', birthTime: '', gender: 'unspecified', bloodType: '', fatherHeightCm: '', motherHeightCm: '', schoolStage: '', personality: '', aiBackground: '' });
 
   const [measurementOpen, setMeasurementOpen] = useState(false);
   const [editingMeasurement, setEditingMeasurement] = useState<GrowthMeasurement | null>(null);
@@ -147,6 +159,11 @@ export function GrowthProfile({ childId }: { childId: string }) {
     saveProfile.mutate(
       {
         birthDate: profileForm.birthDate || null,
+        birthTime: profileForm.birthTime || null,
+        gender: profileForm.gender as ChildProfile['gender'],
+        bloodType: (profileForm.bloodType || null) as ChildProfile['bloodType'],
+        fatherHeightCm: profileForm.fatherHeightCm === '' ? null : Number(profileForm.fatherHeightCm),
+        motherHeightCm: profileForm.motherHeightCm === '' ? null : Number(profileForm.motherHeightCm),
         schoolStage: profileForm.schoolStage || null,
         personality: profileForm.personality || null,
         aiBackground: profileForm.aiBackground || null,
@@ -194,6 +211,22 @@ export function GrowthProfile({ childId }: { childId: string }) {
 
   const latestHeight = measurements?.find((m) => m.heightCm !== null)?.heightCm;
   const latestWeight = measurements?.find((m) => m.weightKg !== null)?.weightKg;
+  const { data: bazi } = useBazi(childId);
+
+  const genderLabel = profile?.gender === 'female' ? '女' : profile?.gender === 'male' ? '男' : null;
+  const ageText = (() => {
+    if (!profile?.birthDate) return null;
+    const [y, m, d] = profile.birthDate.split('-').map(Number);
+    const birth = new Date(y, m - 1, d);
+    const now = new Date();
+    let months = (now.getFullYear() - y) * 12 + (now.getMonth() - (m - 1));
+    if (now.getDate() < d) months -= 1;
+    if (months < 0) return null;
+    const years = Math.floor(months / 12);
+    const rem = months % 12;
+    if (years === 0) return `${rem} 个月`;
+    return rem > 0 ? `${years} 岁 ${rem} 个月` : `${years} 岁`;
+  })();
 
   return (
     <div className="space-y-4">
@@ -207,14 +240,38 @@ export function GrowthProfile({ childId }: { childId: string }) {
       </div>
 
       <div className="rounded-xl border border-gray-200 bg-white p-4 space-y-3">
-        <div className="grid grid-cols-2 gap-3 text-sm">
+        {bazi?.available && (
+          <div className="flex flex-wrap gap-1.5">
+            <span className="rounded-full bg-violet-50 px-2.5 py-1 text-xs text-violet-700">生肖 · {bazi.zodiac}</span>
+            <span className="rounded-full bg-sky-50 px-2.5 py-1 text-xs text-sky-700">星座 · {bazi.xingZuo}</span>
+            <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs text-amber-700">农历 · {bazi.lunarDate}</span>
+            {ageText && <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs text-emerald-700">年龄 · {ageText}</span>}
+          </div>
+        )}
+        <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
           <div>
             <p className="text-xs text-gray-400">出生日期</p>
-            <p className="text-gray-800">{profile?.birthDate ?? '—'}</p>
+            <p className="text-gray-800">{profile?.birthDate ?? '—'}{profile?.birthTime ? ` ${profile.birthTime}` : ''}</p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-400">性别</p>
+            <p className="text-gray-800">{genderLabel ?? '—'}</p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-400">血型</p>
+            <p className="text-gray-800">{profile?.bloodType && profile.bloodType !== 'unknown' ? profile.bloodType : '—'}</p>
           </div>
           <div>
             <p className="text-xs text-gray-400">学校阶段</p>
             <p className="text-gray-800">{profile?.schoolStage ?? '—'}</p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-400">父亲身高</p>
+            <p className="text-gray-800">{profile?.fatherHeightCm ? `${profile.fatherHeightCm} cm` : '—'}</p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-400">母亲身高</p>
+            <p className="text-gray-800">{profile?.motherHeightCm ? `${profile.motherHeightCm} cm` : '—'}</p>
           </div>
           <div>
             <p className="text-xs text-gray-400">最新身高</p>
@@ -237,6 +294,8 @@ export function GrowthProfile({ childId }: { childId: string }) {
           <p className="whitespace-pre-wrap text-sm text-gray-800">{profile?.aiBackground ?? '—'}</p>
         </div>
       </div>
+
+      <BaziCard childId={childId} />
 
       <GrowthCurve measurements={measurements ?? []} />
 
@@ -306,6 +365,61 @@ export function GrowthProfile({ childId }: { childId: string }) {
               value={profileForm.birthDate}
               onChange={(e) => setProfileForm((f) => ({ ...f, birthDate: e.target.value }))}
             />
+            <Input
+              label="出生时间"
+              type="time"
+              value={profileForm.birthTime}
+              onChange={(e) => setProfileForm((f) => ({ ...f, birthTime: e.target.value }))}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <label className="space-y-1">
+              <span className="block text-sm font-medium text-gray-700">性别</span>
+              <select
+                value={profileForm.gender}
+                onChange={(e) => setProfileForm((f) => ({ ...f, gender: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="unspecified">不填写</option>
+                <option value="female">女</option>
+                <option value="male">男</option>
+              </select>
+            </label>
+            <label className="space-y-1">
+              <span className="block text-sm font-medium text-gray-700">血型</span>
+              <select
+                value={profileForm.bloodType}
+                onChange={(e) => setProfileForm((f) => ({ ...f, bloodType: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="">不填写</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="AB">AB</option>
+                <option value="O">O</option>
+                <option value="unknown">未知</option>
+              </select>
+            </label>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Input
+              label="父亲身高 (cm)"
+              type="number"
+              step="0.1"
+              value={profileForm.fatherHeightCm}
+              onChange={(e) => setProfileForm((f) => ({ ...f, fatherHeightCm: e.target.value }))}
+              placeholder="可选，供生长分析参考"
+            />
+            <Input
+              label="母亲身高 (cm)"
+              type="number"
+              step="0.1"
+              value={profileForm.motherHeightCm}
+              onChange={(e) => setProfileForm((f) => ({ ...f, motherHeightCm: e.target.value }))}
+              placeholder="可选，供生长分析参考"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
             <Input
               label="学校阶段"
               value={profileForm.schoolStage}

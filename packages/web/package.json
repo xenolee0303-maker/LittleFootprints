@@ -12,9 +12,10 @@
   },
   "dependencies": {
     "@littlefootprints/shared": "*",
+    "@tanstack/react-query": "^5.0.0",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
-    "@tanstack/react-query": "^5.0.0"
+    "solarlunar": "^3.1.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^7.0.0",

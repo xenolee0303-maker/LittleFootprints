@@ -50,6 +50,13 @@
             "when": 1789192059995,
             "tag": "0006_head_vaccine",
             "breakpoints": true
+        },
+        {
+            "idx": 7,
+            "version": "7",
+            "when": 1789377515034,
+            "tag": "0007_birth_profile",
+            "breakpoints": true
         }
     ]
 }

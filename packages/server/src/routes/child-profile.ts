@@ -11,6 +11,8 @@ import {
 } from './growth-validation.js';
 
 const PROFILE_TEXT_FIELDS = ['schoolStage', 'personality', 'aiBackground'] as const;
+const BLOOD_TYPES = ['A', 'B', 'AB', 'O', 'unknown'];
+const GENDERS = ['female', 'male', 'unspecified'];
 
 export async function childProfileRoutes(app: FastifyInstance) {
   // GET /api/children/:childId/child-summaries — child-safe weekly report highlights
@@ -61,6 +63,42 @@ export async function childProfileRoutes(app: FastifyInstance) {
           return reply.status(400).send({ message: `${field} must be a string or null` });
         }
         input_[field] = normalizeNullableText(input[field]);
+      }
+    }
+    if (hasOwn(input, 'birthTime')) {
+      if (input.birthTime === null || input.birthTime === '') {
+        input_.birthTime = null;
+      } else if (typeof input.birthTime !== 'string' || !/^([01]\d|2[0-3]):[0-5]\d$/.test(input.birthTime)) {
+        return reply.status(400).send({ message: 'birthTime must be HH:mm' });
+      } else {
+        input_.birthTime = input.birthTime;
+      }
+    }
+    if (hasOwn(input, 'gender')) {
+      if (!GENDERS.includes(input.gender as string)) {
+        return reply.status(400).send({ message: 'gender must be female, male or unspecified' });
+      }
+      input_.gender = input.gender as 'female' | 'male' | 'unspecified';
+    }
+    if (hasOwn(input, 'bloodType')) {
+      if (input.bloodType === null || input.bloodType === '') {
+        input_.bloodType = null;
+      } else if (!BLOOD_TYPES.includes(input.bloodType as string)) {
+        return reply.status(400).send({ message: `bloodType must be one of ${BLOOD_TYPES.join(', ')}` });
+      } else {
+        input_.bloodType = input.bloodType as 'A' | 'B' | 'AB' | 'O' | 'unknown';
+      }
+    }
+    for (const field of ['fatherHeightCm', 'motherHeightCm'] as const) {
+      if (hasOwn(input, field)) {
+        const value = input[field];
+        if (value === null || value === '') {
+          input_[field] = null;
+        } else if (typeof value !== 'number' || !Number.isFinite(value) || value < 30 || value > 250) {
+          return reply.status(400).send({ message: `${field} must be a height in cm` });
+        } else {
+          input_[field] = value;
+        }
       }
     }
 

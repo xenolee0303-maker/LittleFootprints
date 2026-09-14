@@ -11,7 +11,8 @@ export async function childExists(childId: string): Promise<boolean> {
 
 export async function getProfile(childId: string): Promise<ChildProfile | null> {
   const row = await db.select().from(childProfileTable).where(eq(childProfileTable.childId, childId)).get();
-  return row ?? null;
+  if (!row) return null;
+  return { ...row, gender: row.gender as ChildProfile['gender'], bloodType: row.bloodType as ChildProfile['bloodType'] };
 }
 
 export async function upsertProfile(childId: string, input: UpsertChildProfileInput): Promise<ChildProfile | null> {
@@ -19,12 +20,18 @@ export async function upsertProfile(childId: string, input: UpsertChildProfileIn
 
   const existing = await getProfile(childId);
   const now = new Date().toISOString();
+  // Partial upsert: unspecified fields keep their stored value; explicit null clears.
   const merged: ChildProfile = {
     childId,
-    birthDate: input.birthDate ?? null,
-    schoolStage: input.schoolStage ?? null,
-    personality: input.personality ?? null,
-    aiBackground: input.aiBackground ?? null,
+    birthDate: input.birthDate !== undefined ? input.birthDate : existing?.birthDate ?? null,
+    birthTime: input.birthTime !== undefined ? input.birthTime : existing?.birthTime ?? null,
+    gender: (input.gender !== undefined ? input.gender : existing?.gender ?? 'unspecified') as ChildProfile['gender'],
+    bloodType: input.bloodType !== undefined ? input.bloodType : existing?.bloodType ?? null,
+    fatherHeightCm: input.fatherHeightCm !== undefined ? input.fatherHeightCm : existing?.fatherHeightCm ?? null,
+    motherHeightCm: input.motherHeightCm !== undefined ? input.motherHeightCm : existing?.motherHeightCm ?? null,
+    schoolStage: input.schoolStage !== undefined ? input.schoolStage : existing?.schoolStage ?? null,
+    personality: input.personality !== undefined ? input.personality : existing?.personality ?? null,
+    aiBackground: input.aiBackground !== undefined ? input.aiBackground : existing?.aiBackground ?? null,
     createdAt: existing?.createdAt ?? now,
     updatedAt: now,
   };
