@@ -66,7 +66,7 @@ export function KidStudyIntegrationSettings() {
   const save = useSaveKidStudyConfig();
   const test = useTestKidStudy();
   const configured = status?.configured ?? false;
-  const { data: kidstudyChildren } = useKidStudyChildren(configured);
+  const { data: kidstudyChildren, isLoading: childrenLoading, isError: childrenError } = useKidStudyChildren(configured);
 
   const [baseUrl, setBaseUrl] = useState('');
   const [pin, setPin] = useState('');
@@ -166,8 +166,8 @@ export function KidStudyIntegrationSettings() {
               />
             ))}
           </div>
-          {kidstudyChildren && kidstudyChildren.length === 0 && (
-            <p className="mt-1 text-xs text-gray-400">无法读取学习系统的孩子列表，请检查地址和 PIN</p>
+          {(childrenError || (kidstudyChildren && kidstudyChildren.length === 0)) && (
+            <p className="mt-1 text-xs text-amber-600">孩子列表读取失败——请确认地址和 PIN 已保存，必要时刷新页面重试</p>
           )}
         </div>
       )}

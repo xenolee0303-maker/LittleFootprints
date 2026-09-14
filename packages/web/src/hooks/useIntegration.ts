@@ -19,7 +19,10 @@ export function useSaveKidStudyConfig() {
   return useMutation({
     mutationFn: (input: { baseUrl: string; pin?: string }) =>
       api.put<KidStudyBridgeStatus>('/integrations/kidstudy', input),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['kidstudy-status'] }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['kidstudy-status'] });
+      void qc.invalidateQueries({ queryKey: ['kidstudy-children'] });
+    },
   });
 }
 
