@@ -32,6 +32,7 @@ export type BloodType = 'A' | 'B' | 'AB' | 'O' | 'unknown';
 
 export interface ChildProfile {
   childId: string;
+  birthPlace: string | null; // 出生地（城市），用于真太阳时修正
   birthDate: string | null;
   birthTime: string | null;      // HH:mm
   gender: 'female' | 'male' | 'unspecified';
@@ -46,7 +47,7 @@ export interface ChildProfile {
 }
 
 export type UpsertChildProfileInput = Partial<
-  Pick<ChildProfile, 'birthDate' | 'birthTime' | 'gender' | 'bloodType' | 'fatherHeightCm' | 'motherHeightCm' | 'schoolStage' | 'personality' | 'aiBackground'>
+  Pick<ChildProfile, 'birthPlace' | 'birthDate' | 'birthTime' | 'gender' | 'bloodType' | 'fatherHeightCm' | 'motherHeightCm' | 'schoolStage' | 'personality' | 'aiBackground'>
 >;
 
 export interface GrowthMeasurement {
@@ -336,9 +337,21 @@ export interface BaziPillar {
   naYin: string;
 }
 
+export interface BaziDaYun {
+  ganZhi: string;
+  startAge: number;
+  endAge: number;
+  startYear: number;
+  endYear: number;
+  current: boolean;
+}
+
 export interface BaziResult {
   available: true;
   solarDate: string;
+  birthPlace: string | null;
+  trueSolarTime: string | null;  // 经度修正后的真太阳时（平太阳时近似）
+  trueSolarApplied: boolean;
   lunarDate: string;
   zodiac: string;
   xingZuo: string;
@@ -347,6 +360,8 @@ export interface BaziResult {
   fiveElements: Array<{ element: string; count: number }>;
   dayMaster: string;
   dayStem: string;
+  qiYun: string | null;          // 起运描述，如 出生后4年9个月起运
+  daYun: BaziDaYun[];            // 大运表（时辰已知时才有）
 }
 
 export interface BaziUnavailable {

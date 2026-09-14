@@ -33,6 +33,12 @@ export function BaziCard({ childId }: { childId: string }) {
         )}
       </div>
 
+      {bazi.trueSolarTime && (
+        <p className="rounded-lg bg-white px-3 py-2 text-xs text-gray-500">
+          ⏱ 已按出生地（{bazi.birthPlace}）做真太阳时修正：{bazi.trueSolarTime}
+        </p>
+      )}
+
       <div>
         <p className="mb-1 text-xs text-gray-500">
           五行分布：日主 {bazi.dayMaster}
@@ -49,8 +55,27 @@ export function BaziCard({ childId }: { childId: string }) {
           ))}
         </div>
       </div>
+      {bazi.daYun.length > 0 && (
+        <div>
+          <p className="mb-1 text-xs text-gray-500">大运（十年一步）{bazi.qiYun ? ` · ${bazi.qiYun}` : ''}</p>
+          <div className="flex gap-1.5 overflow-x-auto pb-1">
+            {bazi.daYun.map((dy) => (
+              <div
+                key={dy.startYear}
+                className={`shrink-0 rounded-lg border px-2 py-1.5 text-center ${
+                  dy.current ? 'border-violet-400 bg-violet-50' : 'border-gray-200 bg-white'
+                }`}
+              >
+                <p className="text-sm font-semibold tracking-widest text-gray-900">{dy.ganZhi || '起运前'}</p>
+                <p className="text-[10px] text-gray-400">{dy.startAge}~{dy.endAge}岁</p>
+                {dy.current && <p className="text-[10px] font-medium text-violet-600">当前</p>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       <p className="text-[10px] leading-4 text-gray-400">
-        八字与五行由出生日期按传统历法推算，属于民俗文化内容，仅供参考与趣味记录，不构成科学结论。
+        八字与五行由出生日期按传统历法推算，属于民俗文化内容，仅供参考与趣味记录，不构成科学结论，请勿据此决定孩子的培养方向。
       </p>
     </section>
   );

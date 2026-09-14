@@ -23,6 +23,7 @@ export async function upsertProfile(childId: string, input: UpsertChildProfileIn
   // Partial upsert: unspecified fields keep their stored value; explicit null clears.
   const merged: ChildProfile = {
     childId,
+    birthPlace: input.birthPlace !== undefined ? input.birthPlace : existing?.birthPlace ?? null,
     birthDate: input.birthDate !== undefined ? input.birthDate : existing?.birthDate ?? null,
     birthTime: input.birthTime !== undefined ? input.birthTime : existing?.birthTime ?? null,
     gender: (input.gender !== undefined ? input.gender : existing?.gender ?? 'unspecified') as ChildProfile['gender'],

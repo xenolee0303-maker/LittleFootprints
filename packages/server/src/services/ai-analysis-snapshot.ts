@@ -52,7 +52,12 @@ export async function buildAnalysisSnapshot(
     db.select().from(healthProfileTable).where(eq(healthProfileTable.childId, childId)).get(),
     db.select().from(healthRecordTable).where(eq(healthRecordTable.childId, childId)).all(),
   ]);
-  const bazi = computeBazi({ birthDate: profile?.birthDate ?? null, birthTime: profile?.birthTime ?? null });
+  const bazi = computeBazi({
+    birthDate: profile?.birthDate ?? null,
+    birthTime: profile?.birthTime ?? null,
+    birthPlace: profile?.birthPlace ?? null,
+    gender: (profile?.gender ?? 'unspecified') as 'female' | 'male' | 'unspecified',
+  });
 
   const interestById = new Map(interests.map((i) => [i.id, i]));
   const notesInRange = allNotes.filter((n) => interestById.has(n.interestId) && n.date >= rangeFrom && n.date <= rangeTo);

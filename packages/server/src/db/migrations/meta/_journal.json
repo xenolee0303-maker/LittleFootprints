@@ -57,6 +57,13 @@
             "when": 1789377515034,
             "tag": "0007_birth_profile",
             "breakpoints": true
+        },
+        {
+            "idx": 8,
+            "version": "7",
+            "when": 1789426346199,
+            "tag": "0008_birth_place",
+            "breakpoints": true
         }
     ]
 }

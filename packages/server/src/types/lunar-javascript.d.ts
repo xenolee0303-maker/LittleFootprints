@@ -15,6 +15,14 @@ declare module 'lunar-javascript' {
     getDayNaYin(): string;
     getTimeNaYin(): string;
     getDayGan(): string;
+    getYun(gender: number): Yun;
+  }
+
+  export interface Yun {
+    getStartYear(): number;
+    getStartMonth(): number;
+    getStartDay(): number;
+    getDaYun(): Array<{ getGanZhi(): string; getStartAge(): number; getEndAge(): number; getStartYear(): number; getEndYear(): number }>;
   }
 
   export interface Lunar {

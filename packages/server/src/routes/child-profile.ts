@@ -10,7 +10,7 @@ import {
   isValidDate,
 } from './growth-validation.js';
 
-const PROFILE_TEXT_FIELDS = ['schoolStage', 'personality', 'aiBackground'] as const;
+const PROFILE_TEXT_FIELDS = ['schoolStage', 'personality', 'aiBackground', 'birthPlace'] as const;
 const BLOOD_TYPES = ['A', 'B', 'AB', 'O', 'unknown'];
 const GENDERS = ['female', 'male', 'unspecified'];
 

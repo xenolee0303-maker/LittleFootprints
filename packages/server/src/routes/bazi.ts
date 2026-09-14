@@ -10,6 +10,11 @@ export async function baziRoutes(app: FastifyInstance) {
       return reply.status(404).send({ message: 'Child not found' });
     }
     const profile = await getProfile(childId);
-    return computeBazi({ birthDate: profile?.birthDate ?? null, birthTime: profile?.birthTime ?? null });
+    return computeBazi({
+      birthDate: profile?.birthDate ?? null,
+      birthTime: profile?.birthTime ?? null,
+      birthPlace: profile?.birthPlace ?? null,
+      gender: profile?.gender ?? 'unspecified',
+    });
   });
 }

@@ -3,6 +3,7 @@ import { childTable } from './child.js';
 
 export const childProfileTable = sqliteTable('child_profile', {
   childId: text('child_id').primaryKey().references(() => childTable.id, { onDelete: 'cascade' }),
+  birthPlace: text('birth_place'),
   birthDate: text('birth_date'),
   birthTime: text('birth_time'),
   gender: text('gender').notNull().default('unspecified'),

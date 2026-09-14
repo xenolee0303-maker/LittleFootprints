@@ -95,6 +95,7 @@ function GrowthCurve({ measurements }: { measurements: GrowthMeasurement[] }) {
 }
 
 interface ProfileFormState {
+  birthPlace: string;
   birthDate: string;
   birthTime: string;
   gender: string;
@@ -108,6 +109,7 @@ interface ProfileFormState {
 
 function profileToForm(profile: ChildProfile | undefined): ProfileFormState {
   return {
+    birthPlace: profile?.birthPlace ?? '',
     birthDate: profile?.birthDate ?? '',
     birthTime: profile?.birthTime ?? '',
     gender: profile?.gender ?? 'unspecified',
@@ -138,7 +140,7 @@ export function GrowthProfile({ childId }: { childId: string }) {
   const deleteMeasurement = useDeleteMeasurement();
 
   const [profileOpen, setProfileOpen] = useState(false);
-  const [profileForm, setProfileForm] = useState<ProfileFormState>({ birthDate: '', birthTime: '', gender: 'unspecified', bloodType: '', fatherHeightCm: '', motherHeightCm: '', schoolStage: '', personality: '', aiBackground: '' });
+  const [profileForm, setProfileForm] = useState<ProfileFormState>({ birthPlace: '', birthDate: '', birthTime: '', gender: 'unspecified', bloodType: '', fatherHeightCm: '', motherHeightCm: '', schoolStage: '', personality: '', aiBackground: '' });
 
   const [measurementOpen, setMeasurementOpen] = useState(false);
   const [editingMeasurement, setEditingMeasurement] = useState<GrowthMeasurement | null>(null);
@@ -158,6 +160,7 @@ export function GrowthProfile({ childId }: { childId: string }) {
   const submitProfile = () => {
     saveProfile.mutate(
       {
+        birthPlace: profileForm.birthPlace || null,
         birthDate: profileForm.birthDate || null,
         birthTime: profileForm.birthTime || null,
         gender: profileForm.gender as ChildProfile['gender'],
@@ -372,6 +375,22 @@ export function GrowthProfile({ childId }: { childId: string }) {
               onChange={(e) => setProfileForm((f) => ({ ...f, birthTime: e.target.value }))}
             />
           </div>
+          <label className="space-y-1 block">
+            <span className="block text-sm font-medium text-gray-700">出生地（城市）</span>
+            <input
+              list="major-cities"
+              value={profileForm.birthPlace}
+              onChange={(e) => setProfileForm((f) => ({ ...f, birthPlace: e.target.value }))}
+              placeholder="用于真太阳时修正，如 北京"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+            <datalist id="major-cities">
+              {['北京','上海','广州','深圳','成都','重庆','杭州','南京','武汉','西安','沈阳','哈尔滨','天津','郑州','长沙','昆明','青岛','大连','厦门','福州','南宁','贵阳','香港','澳门','台北'].map((city) => (
+                <option key={city} value={city} />
+              ))}
+            </datalist>
+            <span className="block text-xs text-gray-400">填主要城市可自动做真太阳时修正，让八字排盘更精确</span>
+          </label>
           <div className="grid grid-cols-2 gap-3">
             <label className="space-y-1">
               <span className="block text-sm font-medium text-gray-700">性别</span>
