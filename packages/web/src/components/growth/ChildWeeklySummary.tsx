@@ -46,7 +46,7 @@ export function ChildWeeklySummaryCard({ childId }: { childId: string }) {
         <div className="py-6 text-center text-sm text-gray-400">加载中...</div>
       ) : !latest ? (
         <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50 p-5 text-center text-sm text-gray-400">
-          {isParent ? '还没有生成周报。在「AI 分析」页生成后，这里的亮点会展示给孩子看。' : '这一周的亮点整理好之后就会出现在这里，先去记一笔兴趣进展吧'}
+          {isParent ? '还没有生成周报。配置 AI 服务后会自动生成；也可在下方「AI 联合周报」卡里手动生成。' : '这一周的亮点整理好之后就会出现在这里，先去记一笔兴趣进展吧'}
         </div>
       ) : (
         <div className="space-y-2">

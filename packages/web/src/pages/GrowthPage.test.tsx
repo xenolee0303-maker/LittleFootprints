@@ -57,6 +57,17 @@ vi.mock('../hooks/useGrowth', async (importOriginal) => {
   };
 });
 
+vi.mock('../hooks/useAiAnalysis', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../hooks/useAiAnalysis')>();
+  return {
+    ...actual,
+    useAiReports: () => ({ data: [], isLoading: false }),
+    useAiReport: () => ({ data: undefined }),
+    useGenerateAiReport: () => ({ mutate: vi.fn(), isPending: false, error: null }),
+    useRefreshAiReport: () => ({ mutate: vi.fn(), isPending: false, error: null }),
+  };
+});
+
 vi.mock('../hooks/useIntegration', () => ({
   useKidStudyStatus: () => ({ data: { configured: true, baseUrl: 'http://192.168.3.102:3001' } }),
   useLearningSummary: () => ({
